@@ -1,0 +1,1845 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="fuck">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="4.16133090305748E-07 0.000892667627516181 0.0163400574664952"
+        rpy="0 0 0" />
+      <mass
+        value="2.74586099313239" />
+      <inertia
+        ixx="0.00663050937960538"
+        ixy="7.66932083204229E-10"
+        ixz="-3.71716997585415E-08"
+        iyy="0.00507968253020607"
+        iyz="2.5019632895728E-05"
+        izz="0.00646950578003987" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="Rhip-pitch">
+    <inertial>
+      <origin
+        xyz="-0.0025168889607323 -0.0466794286103524 -0.0170464249414737"
+        rpy="0 0 0" />
+      <mass
+        value="0.337531091535058" />
+      <inertia
+        ixx="0.000472639978064759"
+        ixy="-1.25991328141959E-06"
+        ixz="-4.15283216904758E-06"
+        iyy="0.000360017864797971"
+        iyz="-3.36747191319583E-05"
+        izz="0.000358409876213602" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rhip-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rhip-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rhip-pitch"
+    type="revolute">
+    <origin
+      xyz="0 -0.069000000000001 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Rhip-pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rhip-roll">
+    <inertial>
+      <origin
+        xyz="-0.00803774464637703 -0.00101303984157786 -0.0367626564178768"
+        rpy="0 0 0" />
+      <mass
+        value="0.604619876832841" />
+      <inertia
+        ixx="0.000867240931618366"
+        ixy="-4.56710170579481E-06"
+        ixz="-0.000219904509054263"
+        iyy="0.000954982060712569"
+        iyz="5.39055457507207E-06"
+        izz="0.000888304416437135" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rhip-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rhip-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rhip-roll"
+    type="revolute">
+    <origin
+      xyz="0.0321289328949669 -0.0499999999999999 -0.0201939142077688"
+      rpy="0 0 0" />
+    <parent
+      link="Rhip-pitch" />
+    <child
+      link="Rhip-roll" />
+    <axis
+      xyz="-0.999981854966748 0 0.00602409638554543" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rleg-yaw">
+    <inertial>
+      <origin
+        xyz="-0.00312326966809828 0.00213973651422343 -0.103905105276982"
+        rpy="0 0 0" />
+      <mass
+        value="1.51191680217784" />
+      <inertia
+        ixx="0.00300966586461577"
+        ixy="-2.21039758572146E-06"
+        ixz="0.0001037723628967"
+        iyy="0.00260974676832354"
+        iyz="4.35859817705455E-05"
+        izz="0.00235519867991485" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rleg-yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rleg-yaw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rleg-yaw"
+    type="revolute">
+    <origin
+      xyz="-0.0243911307842633 0 -0.0648542422595855"
+      rpy="0 0 0" />
+    <parent
+      link="Rhip-roll" />
+    <child
+      link="Rleg-yaw" />
+    <axis
+      xyz="-0.00602409638554532 0 -0.999981854966748" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Pknee-pitch">
+    <inertial>
+      <origin
+        xyz="-0.0011504994447758 8.99871289270215E-05 -0.109396083306283"
+        rpy="0 0 0" />
+      <mass
+        value="1.80573124393406" />
+      <inertia
+        ixx="0.0258408754235911"
+        ixy="-3.61907860253738E-06"
+        ixz="-0.000281177416996331"
+        iyy="0.0263028229640219"
+        iyz="4.76038104831221E-05"
+        izz="0.00183261634275581" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Pknee-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Pknee-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rknee-pitch"
+    type="revolute">
+    <origin
+      xyz="-0.0111142763810016 0.00499999999999955 -0.184936402204994"
+      rpy="0 0 0" />
+    <parent
+      link="Rleg-yaw" />
+    <child
+      link="Pknee-pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rankle-pitch">
+    <inertial>
+      <origin
+        xyz="-2.64456067249064E-06 -2.43383237175099E-09 -0.00812720824388957"
+        rpy="0 0 0" />
+      <mass
+        value="0.0171591478812247" />
+      <inertia
+        ixx="2.4558210811628E-06"
+        ixy="-1.64871514786717E-12"
+        ixz="1.17577213394421E-10"
+        iyy="3.26464904844394E-06"
+        iyz="-4.73794129765219E-13"
+        izz="2.25510633303582E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rankle-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rankle-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rankle-pitch"
+    type="revolute">
+    <origin
+      xyz="0.0191653024840886 0 -0.412622940686401"
+      rpy="0 0 0" />
+    <parent
+      link="Pknee-pitch" />
+    <child
+      link="Rankle-pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rankle-roll">
+    <inertial>
+      <origin
+        xyz="0.01770486123041 6.01478156447843E-08 -0.0261609815806907"
+        rpy="0 0 0" />
+      <mass
+        value="0.62930389291396" />
+      <inertia
+        ixx="0.000363233257575954"
+        ixy="1.43405476771528E-09"
+        ixz="-8.96417225262622E-06"
+        iyy="0.00232893464645625"
+        iyz="-9.43626799230063E-11"
+        izz="0.00261354084496982" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rankle-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rankle-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rankle-roll"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0149999999999999"
+      rpy="0 0 0" />
+    <parent
+      link="Rankle-pitch" />
+    <child
+      link="Rankle-roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lhip-pitch">
+    <inertial>
+      <origin
+        xyz="-0.00254636309481921 0.0432466227241415 -0.0132087299961457"
+        rpy="0 0 0" />
+      <mass
+        value="0.386381137343126" />
+      <inertia
+        ixx="0.000557023322800266"
+        ixy="-3.77941809344806E-07"
+        ixz="-2.01189637355669E-06"
+        iyy="0.000420066199291086"
+        iyz="6.49222822461764E-05"
+        izz="0.00040739518569122" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lhip-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lhip-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lhip-pitch"
+    type="revolute">
+    <origin
+      xyz="0 0.0689999999999989 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Lhip-pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lhip-roll">
+    <inertial>
+      <origin
+        xyz="-0.00651166348866414 0.000823734562451911 -0.0348813012196115"
+        rpy="0 0 0" />
+      <mass
+        value="0.212465071618444" />
+      <inertia
+        ixx="0.00031004863568897"
+        ixy="3.22388071100758E-06"
+        ixz="-7.64317683314942E-05"
+        iyy="0.000338004110916466"
+        iyz="-8.2095428664136E-07"
+        izz="0.000320623038936227" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lhip-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lhip-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lhip-roll"
+    type="revolute">
+    <origin
+      xyz="0.0320272336417868 0.0500000000000001 -0.0199563600201637"
+      rpy="0 0 0" />
+    <parent
+      link="Lhip-pitch" />
+    <child
+      link="Lhip-roll" />
+    <axis
+      xyz="-0.999999070885153 0 -0.00136316867310442" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lleg-yaw">
+    <inertial>
+      <origin
+        xyz="-0.00304648888175686 -0.00214822476705481 -0.104161278316881"
+        rpy="0 0 0" />
+      <mass
+        value="0.561993600265959" />
+      <inertia
+        ixx="0.00342882830435025"
+        ixy="-7.70942371180728E-06"
+        ixz="-0.000166306103124531"
+        iyy="0.00329783254603732"
+        iyz="-0.000111547125440254"
+        izz="0.000900819979760053" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lleg-yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lleg-yaw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lleg-yaw"
+    type="revolute">
+    <origin
+      xyz="-0.0239113717374919 0 -0.0650326556556895"
+      rpy="0 0 0" />
+    <parent
+      link="Lhip-roll" />
+    <child
+      link="Lleg-yaw" />
+    <axis
+      xyz="0.00136316867310442 0 -0.999999070885153" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lknee-pitch">
+    <inertial>
+      <origin
+        xyz="-0.000341147730402988 8.91715749904709E-05 -0.109411813503779"
+        rpy="0 0 0" />
+      <mass
+        value="1.80581812955404" />
+      <inertia
+        ixx="0.0258477371256222"
+        ixy="-3.97978443811404E-06"
+        ixz="-0.000103326665143282"
+        iyy="0.0263068985069257"
+        iyz="4.72361630388147E-05"
+        izz="0.00182984789945463" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lknee-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lknee-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lknee-pitch"
+    type="revolute">
+    <origin
+      xyz="-0.0117478026460974 -0.00500000000000012 -0.185016186137831"
+      rpy="0 0 0" />
+    <parent
+      link="Lleg-yaw" />
+    <child
+      link="Lknee-pitch" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lankle-pitch">
+    <inertial>
+      <origin
+        xyz="-2.64456067233798E-06 -2.43383233011762E-09 -0.00812720824388957"
+        rpy="0 0 0" />
+      <mass
+        value="0.0171591478812246" />
+      <inertia
+        ixx="2.45582108116279E-06"
+        ixy="-1.64871514831557E-12"
+        ixz="1.17577213394171E-10"
+        iyy="3.26464904844395E-06"
+        iyz="-4.73794129410117E-13"
+        izz="2.25510633303582E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lankle-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lankle-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lankle-pitch"
+    type="revolute">
+    <origin
+      xyz="0.0222129220563394 0 -0.412470103272612"
+      rpy="0 0 0" />
+    <parent
+      link="Lknee-pitch" />
+    <child
+      link="Lankle-pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lankle-roll">
+    <inertial>
+      <origin
+        xyz="0.0177048612304101 6.01478156170288E-08 -0.0261609815806902"
+        rpy="0 0 0" />
+      <mass
+        value="0.629303892913963" />
+      <inertia
+        ixx="0.000363233257575956"
+        ixy="1.43405476412933E-09"
+        ixz="-8.96417225262527E-06"
+        iyy="0.00232893464645625"
+        iyz="-9.4362680394193E-11"
+        izz="0.00261354084496983" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lankle-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lankle-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lankle-roll"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0149999999999999"
+      rpy="0 0 0" />
+    <parent
+      link="Lankle-pitch" />
+    <child
+      link="Lankle-roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="waist-yaw">
+    <inertial>
+      <origin
+        xyz="0.000838548932558511 1.94294719019911E-06 0.0186119972543406"
+        rpy="0 0 0" />
+      <mass
+        value="0.167524107737488" />
+      <inertia
+        ixx="9.88251687847134E-05"
+        ixy="-3.29170093226674E-08"
+        ixz="-1.00029871006872E-06"
+        iyy="0.000102644683208664"
+        iyz="-9.40583079992401E-10"
+        izz="0.000183718897605441" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/waist-yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/waist-yaw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="waist-yaw"
+    type="revolute">
+    <origin
+      xyz="0 0 0.1015"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="waist-yaw" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="waist-roll">
+    <inertial>
+      <origin
+        xyz="1.97709520768918E-08 1.97091613064748E-08 2.31318830895555E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.0511904050675653" />
+      <inertia
+        ixx="3.39482519018086E-06"
+        ixy="-7.4903459489098E-14"
+        ixz="-5.89301215819914E-13"
+        iyy="5.66454429374261E-06"
+        iyz="-3.47464655422482E-09"
+        izz="4.73575691209588E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/waist-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.529411764705882 0.549019607843137 0.549019607843137 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/waist-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="waist-roll"
+    type="revolute">
+    <origin
+      xyz="0 0 0.0469999999999995"
+      rpy="0 0 0" />
+    <parent
+      link="waist-yaw" />
+    <child
+      link="waist-roll" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="waist-pitch">
+    <inertial>
+      <origin
+        xyz="0.00344100286454484 0.00334213242397238 0.178579205270165"
+        rpy="0 0 0" />
+      <mass
+        value="6.84868650863554" />
+      <inertia
+        ixx="0.0455180072138336"
+        ixy="-5.03870525085118E-05"
+        ixz="-0.000827877042706007"
+        iyy="0.0320278136150326"
+        iyz="0.000429131605271414"
+        izz="0.0239625384595092" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/waist-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/waist-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="waist-pitch"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="waist-roll" />
+    <child
+      link="waist-pitch" />
+    <axis
+      xyz="0 -0.99999 0.0037305" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rshoulder-pitch">
+    <inertial>
+      <origin
+        xyz="1.1973932776542E-05 -0.037631766969166 0.00257001764547576"
+        rpy="0 0 0" />
+      <mass
+        value="0.351201296180657" />
+      <inertia
+        ixx="0.000529028614216069"
+        ixy="-9.99363017558407E-08"
+        ixz="-7.5901341428261E-07"
+        iyy="0.000352986817594136"
+        iyz="-1.96285453452568E-05"
+        izz="0.000381088824596585" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rshoulder-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rshoulder-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rshoulder-pitch"
+    type="revolute">
+    <origin
+      xyz="0.00124892699365971 -0.103096515714583 0.242383061761496"
+      rpy="0 0 0" />
+    <parent
+      link="waist-pitch" />
+    <child
+      link="Rshoulder-pitch" />
+    <axis
+      xyz="0 0.999993041789322 -0.00373046551240969" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rshoulder-roll">
+    <inertial>
+      <origin
+        xyz="-0.0008128324145373 -0.0271831429862337 0.00142268753344876"
+        rpy="0 0 0" />
+      <mass
+        value="0.901300574234883" />
+      <inertia
+        ixx="0.000874742091802786"
+        ixy="2.32436660996658E-05"
+        ixz="-2.38249803989139E-06"
+        iyy="0.00076659536631808"
+        iyz="2.31175600290668E-05"
+        izz="0.00105432805094867" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rshoulder-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rshoulder-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rshoulder-roll"
+    type="revolute">
+    <origin
+      xyz="-0.00124892699365824 -0.0460005024348026 -4.88822667354949E-05"
+      rpy="0 0 0" />
+    <parent
+      link="Rshoulder-pitch" />
+    <child
+      link="Rshoulder-roll" />
+    <axis
+      xyz="0.999986682697375 -1.92523928883499E-05 -0.00516081943538461" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rarm-pitch">
+    <inertial>
+      <origin
+        xyz="-5.86523797540886E-05 -0.0480215847112014 -0.0115614509170335"
+        rpy="0 0 0" />
+      <mass
+        value="0.163656043089394" />
+      <inertia
+        ixx="0.000205301785507928"
+        ixy="-1.4779424169191E-07"
+        ixz="-2.57927481807267E-07"
+        iyy="0.000137025660099078"
+        iyz="-2.92811522486206E-05"
+        izz="0.000154567593086099" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rarm-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rarm-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rarm-pitch"
+    type="revolute">
+    <origin
+      xyz="0.00124892699365715 -0.0939985234157071 0.000571147438479858"
+      rpy="0 0 0" />
+    <parent
+      link="Rshoulder-roll" />
+    <child
+      link="Rarm-pitch" />
+    <axis
+      xyz="0 0.999993041789322 -0.00373046551241809" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rarm-roll">
+    <inertial>
+      <origin
+        xyz="0.00117500064437488 -0.0296883325386476 0.00611806709758511"
+        rpy="0 0 0" />
+      <mass
+        value="0.790024730889844" />
+      <inertia
+        ixx="0.000626951373773777"
+        ixy="2.92949385283807E-07"
+        ixz="5.01290137213443E-07"
+        iyy="0.000565474955147994"
+        iyz="6.26964134376471E-05"
+        izz="0.000724094109271217" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rarm-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rarm-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rarm-roll"
+    type="revolute">
+    <origin
+      xyz="-0.00124892699365667 -0.0600749118698925 -0.019969050977966"
+      rpy="0 0 0" />
+    <parent
+      link="Rarm-pitch" />
+    <child
+      link="Rarm-roll" />
+    <axis
+      xyz="-0.999986682697375 1.92523928882734E-05 0.00516081943539328" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rforearm-pitch">
+    <inertial>
+      <origin
+        xyz="-7.3943698386536E-12 -0.0332659563873272 0.000124095077057462"
+        rpy="0 0 0" />
+      <mass
+        value="0.0616964140219398" />
+      <inertia
+        ixx="1.71013816255747E-05"
+        ixy="1.87493983825494E-10"
+        ixz="5.02726873204336E-08"
+        iyy="1.4645711027657E-05"
+        iyz="4.5505556635535E-08"
+        izz="2.68440203486961E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rforearm-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rforearm-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rforearm-pitch"
+    type="revolute">
+    <origin
+      xyz="0.00118699671361817 -0.0874688267955187 0.00851953486706497"
+      rpy="0 0 0" />
+    <parent
+      link="Rarm-roll" />
+    <child
+      link="Rforearm-pitch" />
+    <axis
+      xyz="0 0.999993041789322 -0.00373046551242672" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rforearm-yaw">
+    <inertial>
+      <origin
+        xyz="-0.00144914299769783 -0.024023819187538 -0.00133242424970509"
+        rpy="0 0 0" />
+      <mass
+        value="0.286322539919696" />
+      <inertia
+        ixx="0.000207156464271699"
+        ixy="-5.67878072518085E-06"
+        ixz="3.37781476350206E-07"
+        iyy="7.94674704834646E-05"
+        iyz="6.31165562473264E-06"
+        izz="0.000207083820030091" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rforearm-yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rforearm-yaw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rforearm-yaw"
+    type="revolute">
+    <origin
+      xyz="0 -0.0519996381730424 0.000193984206656894"
+      rpy="0 0 0" />
+    <parent
+      link="Rforearm-pitch" />
+    <child
+      link="Rforearm-yaw" />
+    <axis
+      xyz="0.00516085534561842 0.00373041583270884 0.999979724579362" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rforearm-roll">
+    <inertial>
+      <origin
+        xyz="-0.000432292829653728 -0.021826539271795 -9.5131751569888E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.0776563326897135" />
+      <inertia
+        ixx="2.75633138511378E-05"
+        ixy="-5.69185165689681E-08"
+        ixz="-2.16185506131003E-08"
+        iyy="1.84792179561101E-05"
+        iyz="-7.1171701494406E-08"
+        izz="1.89294300843364E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rforearm-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rforearm-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rforearm-roll"
+    type="revolute">
+    <origin
+      xyz="0 -0.0479996660058844 0.000179062344592917"
+      rpy="0 0 0" />
+    <parent
+      link="Rforearm-yaw" />
+    <child
+      link="Rforearm-roll" />
+    <axis
+      xyz="-0.999986682697376 1.92523927639293E-05 0.00516081943529982" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Rwrist-pitch">
+    <inertial>
+      <origin
+        xyz="0.000399587918507346 -0.0991084207828886 0.0016368109595673"
+        rpy="0 0 0" />
+      <mass
+        value="0.0581113374906376" />
+      <inertia
+        ixx="2.27805031235871E-05"
+        ixy="6.75255700217209E-08"
+        ixz="-2.27172586758493E-08"
+        iyy="1.16579829150494E-05"
+        iyz="-3.48643404816497E-06"
+        izz="2.76365484061635E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rwrist-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 0.32" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Rwrist-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Rwrist-pitch"
+    type="revolute">
+    <origin
+      xyz="-0.000310603277652269 -0.0289997922319544 0.000109786488636632"
+      rpy="0 0 0" />
+    <parent
+      link="Rforearm-roll" />
+    <child
+      link="Rwrist-pitch" />
+    <axis
+      xyz="0 0.999993041789322 -0.00373046551231421" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lshoulder-pitch">
+    <inertial>
+      <origin
+        xyz="-9.37455533417397E-06 0.0366339168984884 -0.00199140885891907"
+        rpy="0 0 0" />
+      <mass
+        value="0.351201337508422" />
+      <inertia
+        ixx="0.000529028510877296"
+        ixy="1.03704187131655E-07"
+        ixz="-7.69581054857491E-07"
+        iyy="0.000353281271768694"
+        iyz="1.98359816546136E-05"
+        izz="0.000380794448638633" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lshoulder-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lshoulder-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lshoulder-pitch"
+    type="revolute">
+    <origin
+      xyz="0.00127140572076783 0.105918012627561 0.245887711508865"
+      rpy="0 0 0" />
+    <parent
+      link="waist-pitch" />
+    <child
+      link="Lshoulder-pitch" />
+    <axis
+      xyz="0 -0.999993041789322 0.00373046551240926" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lshoulder-roll">
+    <inertial>
+      <origin
+        xyz="0.00207301104207314 0.0271920986739509 0.000978014089045354"
+        rpy="0 0 0" />
+      <mass
+        value="0.901300591228605" />
+      <inertia
+        ixx="0.000874808646674645"
+        ixy="2.30389426023346E-05"
+        ixz="4.06461195955623E-06"
+        iyy="0.000766264670712622"
+        iyz="-2.12073581558666E-05"
+        izz="0.00105459222467772" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lshoulder-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lshoulder-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lshoulder-roll"
+    type="revolute">
+    <origin
+      xyz="-2.24787271085117E-05 0.0449837042723494 -0.00445218798751273"
+      rpy="0 0 0" />
+    <parent
+      link="Lshoulder-pitch" />
+    <child
+      link="Lshoulder-roll" />
+    <axis
+      xyz="-0.999986682697375 1.92523928881331E-05 0.00516081943538374" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Larm-pitch">
+    <inertial>
+      <origin
+        xyz="-6.25416723689307E-05 0.0349340834086484 -0.0118708978450517"
+        rpy="0 0 0" />
+      <mass
+        value="0.163656024444727" />
+      <inertia
+        ixx="0.000205301678168692"
+        ixy="1.55034938012621E-07"
+        ixz="-2.68072404390287E-07"
+        iyy="0.000137463543125656"
+        iyz="2.94087193307623E-05"
+        izz="0.000154129771734942" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Larm-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Larm-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Larm-pitch"
+    type="revolute">
+    <origin
+      xyz="0 0.106999255471457 -0.000399159809829575"
+      rpy="0 0 0" />
+    <parent
+      link="Lshoulder-roll" />
+    <child
+      link="Larm-pitch" />
+    <axis
+      xyz="0 -0.999993041789322 0.00373046551243847" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Larm-roll">
+    <inertial>
+      <origin
+        xyz="3.07237365986743E-05 0.0297324322639181 0.00570310540618663"
+        rpy="0 0 0" />
+      <mass
+        value="0.790024757738836" />
+      <inertia
+        ixx="0.000626951454863792"
+        ixy="-3.48138145719337E-07"
+        ixz="5.064673833516E-07"
+        iyy="0.000564548244316752"
+        iyz="-6.15057707782209E-05"
+        izz="0.00072502073772359" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Larm-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Larm-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Larm-roll"
+    type="revolute">
+    <origin
+      xyz="-0.000103217106914702 0.0469250646474482 -0.0201749263706734"
+      rpy="0 0 0" />
+    <parent
+      link="Larm-pitch" />
+    <child
+      link="Larm-roll" />
+    <axis
+      xyz="0.999986682697375 -1.92523928882734E-05 -0.00516081943539824" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lforearm-pitch">
+    <inertial>
+      <origin
+        xyz="9.42648598067919E-11 0.019266053833041 -7.18685468063529E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.0616964130134071" />
+      <inertia
+        ixx="1.71013819680551E-05"
+        ixy="1.87707733221412E-10"
+        ixz="5.02932608513584E-08"
+        iyy="1.46457108455345E-05"
+        iyz="4.55055467921543E-08"
+        izz="2.68440199012118E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lforearm-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lforearm-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lforearm-pitch"
+    type="revolute">
+    <origin
+      xyz="4.12868268756597E-05 0.101529137056791 0.00762119246809084"
+      rpy="0 0 0" />
+    <parent
+      link="Larm-roll" />
+    <child
+      link="Lforearm-pitch" />
+    <axis
+      xyz="0 -0.999993041789322 0.00373046551240292" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lforearm-yaw">
+    <inertial>
+      <origin
+        xyz="0.00143438826285103 0.0240131539873873 -0.00152650752821093"
+        rpy="0 0 0" />
+      <mass
+        value="0.28632253924729" />
+      <inertia
+        ixx="0.000207149926817268"
+        ixy="-5.74107168065279E-06"
+        ixz="-2.95394490967712E-07"
+        iyy="7.9380835666588E-05"
+        iyz="-5.29988941616332E-06"
+        izz="0.000207176993320116" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lforearm-yaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lforearm-yaw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lforearm-yaw"
+    type="revolute">
+    <origin
+      xyz="0 0.0379997355879942 -0.000141757689466171"
+      rpy="0 0 0" />
+    <parent
+      link="Lforearm-pitch" />
+    <child
+      link="Lforearm-yaw" />
+    <axis
+      xyz="-0.00516085534580852 -0.00373041583267726 -0.999979724579361" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lforearm-roll">
+    <inertial>
+      <origin
+        xyz="0.000430442058502192 0.0218252052550569 -0.000262424408970119"
+        rpy="0 0 0" />
+      <mass
+        value="0.0776563366714876" />
+      <inertia
+        ixx="2.75628437300679E-05"
+        ixy="-5.63335736643544E-08"
+        ixz="-6.70794137624692E-08"
+        iyy="1.8480308623422E-05"
+        iyz="7.51060134799492E-08"
+        izz="1.89288080879214E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lforearm-roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lforearm-roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lforearm-roll"
+    type="revolute">
+    <origin
+      xyz="0 0.0479996660058964 -0.000179062344588921"
+      rpy="0 0 0" />
+    <parent
+      link="Lforearm-yaw" />
+    <child
+      link="Lforearm-roll" />
+    <axis
+      xyz="-0.999986682697374 1.92523929177407E-05 0.00516081943549098" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Lwrist-pitch">
+    <inertial>
+      <origin
+        xyz="0.00515818055637279 0.0895589404876779 -0.00833217535590169"
+        rpy="0 0 0" />
+      <mass
+        value="0.0804763856042744" />
+      <inertia
+        ixx="3.68663904001688E-05"
+        ixy="-7.82114576477141E-07"
+        ixz="3.46048834798794E-06"
+        iyy="2.82436939602006E-05"
+        iyz="4.98266483172352E-06"
+        izz="4.589425000917E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lwrist-pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://fuck/meshes/Lwrist-pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lwrist-pitch"
+    type="revolute">
+    <origin
+      xyz="0.000310603277656869 0.0289997922319544 -0.000109786488636687"
+      rpy="0 0 0" />
+    <parent
+      link="Lforearm-roll" />
+    <child
+      link="Lwrist-pitch" />
+    <axis
+      xyz="0 -0.999993041789322 0.00373046551231349" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+</robot>

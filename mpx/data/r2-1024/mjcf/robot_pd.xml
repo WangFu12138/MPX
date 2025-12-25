@@ -1,0 +1,291 @@
+<mujoco model="r2-1024">
+  <compiler angle="radian" meshdir="meshes/r2-1024" autolimits="true"/>
+
+  <option iterations="2" ls_iterations="5" gravity="0.0 0.0 -9.81">
+    <flag eulerdamp="disable" />
+  </option>
+
+  <statistic meansize="0.05"/>
+
+  <default>
+    <default class="r2">
+      <joint damping="1.0" armature="0.1"/>
+      <geom friction="1.25 0.005 0.0001" condim="3" solimp="0.9 0.95 0.001" solref="0.02 1"/>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" material="default_material"/>
+      </default>
+      <default class="collision">
+        <geom group="3" mass="0" density="0" contype="1" conaffinity="0"/>
+        <default class="foot">
+          <geom type="capsule" size=".014"/>
+          <default class="foot1">
+            <geom fromto="-.035 0 -0.056 .02 0 -0.045"/>
+          </default>
+          <default class="foot2">
+            <geom fromto=".02 0 -0.045 .115 0 -0.056"/>
+          </default>
+          <default class="foot3">
+            <geom fromto=".14 -.03 -0.056 .14 .03 -0.056"/>
+          </default>
+          <default class="foot_single_capsule">
+            <geom fromto=".115 0 -0.056 -.035 0 -0.056"/>
+          </default>
+        </default>
+      </default>
+      <default class="r2foot">
+        <site group="1" pos="0 0 -0.05" />
+        <geom rgba="0.231373 0.380392 0.705882 1" />
+      </default>
+      <site size="0.01" rgba="0.5 0.5 0.5 0.3" group="4"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light mode="targetbodycom" target="base_link" pos="2 0 2.5"/>
+    <body name="base_link" quat="1 0 0 0" pos="0 0 0.7536" childclass="r2">
+      <freejoint/>
+      <geom class="visual" mesh="base_link_base_link" />
+      <body name="Lhip-pitch" pos="0 0.0689999999999989 0">
+        <inertial pos="-0.00254636309481921 0.0432466227241415 -0.0132087299961457" mass="0.386381137343126" diaginertia="0.000557023322800266 0.000420066199291086 0.00040739518569122" />
+        <joint name="Lhip-pitch" type="hinge" range="0 0" axis="0 1 0" />
+        <geom class="visual" mesh="Lhip-pitch_Lhip-pitch" />
+        <body name="Lhip-roll" pos="0.0320272336417868 0.0500000000000001 -0.0199563600201637">
+          <inertial pos="-0.00651166348866415 0.000823734562451911 -0.0348813012196115" mass="0.212465071618444" diaginertia="0.00031004863568897 0.000338004110916466 0.000320623038936227" />
+          <joint name="Lhip-roll" type="hinge" range="0 0" axis="-0.999999070885153 0 -0.00136316867310442" />
+          <geom class="visual" mesh="Lhip-roll_Lhip-roll" />
+          <body name="Lleg-yaw" pos="-0.0239113717374919 0 -0.0650326556556895">
+            <inertial pos="-0.00304648888175686 -0.00214822476705481 -0.104161278316881" mass="0.561993600265959" diaginertia="0.00342882830435025 0.00329783254603732 0.000900819979760054" />
+            <joint name="Lleg-yaw" type="hinge" range="0 0" axis="0.00136316867310442 0 -0.999999070885153" />
+            <geom class="visual" mesh="Lleg-yaw_Lleg-yaw" />
+            <body name="Lknee-pitch" pos="-0.0117478026460974 -0.00500000000000012 -0.185016186137831">
+              <inertial pos="-0.00034114773473138 8.91715773991553E-05 -0.109411813515231" mass="1.80581812965294" diaginertia="0.0258477371297394 0.0263068985117663 0.00182984789955674" />
+              <joint name="Lknee-pitch" type="hinge" range="0 0" axis="0 -1 0" />
+              <geom class="visual" mesh="Lknee-pitch_Lknee-pitch" />
+              <body name="Lankle-pitch" pos="0.0222129220563394 0 -0.412470103272612">
+                <inertial pos="-2.64456067233798E-06 -2.43383233011762E-09 -0.00812720824388957" mass="0.0171591478812246" diaginertia="2.45582108116279e-06 3.26464904844395e-06 2.25510633303582e-06" />
+                <joint name="Lankle-pitch" type="hinge" range="0 0" axis="0 1 0" />
+                <geom class="visual" mesh="Lankle-pitch_Lankle-pitch" />
+                <body name="Lankle-roll" pos="0 0 -0.0149999999999999">
+                  <inertial pos="0.0177048612304101 6.01478156170288E-08 -0.0261609815806904" mass="0.629303892913963" diaginertia="0.000363233257575956 0.00232893464645625 0.00261354084496983" />
+                  <joint name="Lankle-roll" type="hinge" range="0 0" axis="1 0 0" />
+                  <geom class="visual" mesh="Lankle-roll_Lankle-roll" />
+                  <geom name="FL" pos=".115 0 -0.056" size="0.01"/>
+                  <geom name="RL" pos="-.035 0 -0.056" size="0.01"/>
+                  <geom class="foot_single_capsule"/>
+                  <site name="left_foot" class="r2foot"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>      
+      <body name="Rhip-pitch" pos="0 -0.069000000000001 0">
+        <inertial pos="-0.0025168889607323 -0.0466794286103524 -0.0170464249414737" mass="0.337531091535058" diaginertia="0.000472639978064759 0.000360017864797971 0.000358409876213602" />
+        <joint name="Rhip-pitch" type="hinge" range="0 0" axis="0 -1 0" />
+        <geom class="visual" mesh="Rhip-pitch_Rhip-pitch" />
+        <body name="Rhip-roll" pos="0.0321289328949669 -0.0499999999999999 -0.0201939142077688">
+          <inertial pos="-0.00803774464637705 -0.00101303984157786 -0.0367626564178768" mass="0.604619876832841" diaginertia="0.000867240931618366 0.000954982060712569 0.000888304416437135" />
+          <joint name="Rhip-roll" type="hinge" range="0 0" axis="-0.999981854966748 0 0.00602409638554543" />
+          <geom class="visual" mesh="Rhip-roll_Rhip-roll" />
+          <body name="Rleg-yaw" pos="-0.0243911307842633 0 -0.0648542422595855">
+            <inertial pos="-0.00312326966809828 0.00213973651422342 -0.103905105276982" mass="1.51191680217784" diaginertia="0.00300966586461575 0.00260974676832353 0.00235519867991485" />
+            <joint name="Rleg-yaw" type="hinge" range="0 0" axis="-0.00602409638554532 0 -0.999981854966748" />
+            <geom class="visual" mesh="Rleg-yaw_Rleg-yaw" />
+            <body name="Pknee-pitch" pos="-0.0111142763810016 0.00499999999999955 -0.184936402204994">
+              <inertial pos="-0.00115049944926864 8.99871313251588E-05 -0.109396083318006" mass="1.80573124403558" diaginertia="0.0258408754277981 0.0263028229689853 0.00183261634288706" />
+              <joint name="Rknee-pitch" type="hinge" range="0 0" axis="0 1 0" />
+              <geom class="visual" mesh="Pknee-pitch_Pknee-pitch" />
+              <body name="Rankle-pitch" pos="0.0191653024840886 0 -0.412622940686401">
+                <inertial pos="-2.64456067249064E-06 -2.43383237175099E-09 -0.00812720824388957" mass="0.0171591478812247" diaginertia="2.4558210811628e-06 3.26464904844394e-06 2.25510633303582e-06" />
+                <joint name="Rankle-pitch" type="hinge" range="0 0" axis="0 -1 0" />
+                <geom class="visual" mesh="Rankle-pitch_Rankle-pitch" />
+                <body name="Rankle-roll" pos="0 0 -0.0149999999999999">
+                  <inertial pos="0.01770486123041 6.01478156170288E-08 -0.0261609815806908" mass="0.62930389291396" diaginertia="0.000363233257575954 0.00232893464645625 0.00261354084496982" />
+                  <joint name="Rankle-roll" type="hinge" range="0 0" axis="1 0 0" />
+                  <geom class="visual" mesh="Rankle-roll_Rankle-roll" />
+                  <geom name="FR" pos=".115 0 -0.056" size="0.01"/>
+                  <geom name="RR" pos="-.035 0 -0.056" size="0.01"/>
+                  <geom class="foot_single_capsule"/>
+                  <site name="right_foot" class="r2foot"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <body name="waist-yaw" pos="0 0 0.1015">
+        <inertial pos="0.000838548932558386 1.9429471902685E-06 0.0186119972543407" mass="0.167524107737489" diaginertia="9.88251687847136e-05 0.000102644683208664 0.000183718897605441" />
+        <joint name="waist-yaw" type="hinge" range="0 0" axis="0 0 1" />
+        <geom class="visual" mesh="waist-yaw_waist-yaw" />
+        <body name="waist-roll" pos="0 0 0.0469999999999995">
+          <inertial pos="1.97709520768918E-08 1.97091613064748E-08 2.31318830895555E-08" mass="0.0511904050675653" diaginertia="3.39482519018086e-06 5.66454429374261e-06 4.73575691209588e-06" />
+          <joint name="waist-roll" type="hinge" range="0 0" axis="-1 0 0" />
+          <geom class="visual" mesh="waist-roll_waist-roll" />
+          <body name="waist-pitch">
+            <inertial pos="0.00344100284916034 0.0033421324318141 0.178579205212244" mass="6.84868650679273" diaginertia="0.0455180072144121 0.0320278136152675 0.0239625384602924" />
+            <joint name="waist-pitch" type="hinge" axis="0 -0.999993041789322 0.00373046551240819" />
+            <geom class="visual" mesh="waist-pitch_waist-pitch" />
+            <body name="Rshoulder-pitch" pos="0.00124892699365971 -0.103096515714583 0.242383061761496">
+              <inertial pos="1.19739327765281E-05 -0.037631766969166 0.00257001764547576" mass="0.351201296180657" diaginertia="0.000529028614216069 0.000352986817594136 0.000381088824596585" />
+              <joint name="Rshoulder-pitch" type="hinge" range="0 0" axis="0 0.999993041789322 -0.00373046551240969" />
+              <geom class="visual" mesh="Rshoulder-pitch_Rshoulder-pitch" />
+              <body name="Rshoulder-roll" pos="-0.00124892699365824 -0.0460005024348026 -4.88822667354949E-05">
+                <inertial pos="-0.000812832414537328 -0.0271831429862336 0.00142268753344876" mass="0.901300574234884" diaginertia="0.000874742091802788 0.000766595366318081 0.00105432805094867" />
+                <joint name="Rshoulder-roll" type="hinge" range="0 0" axis="0.999986682697375 -1.92523928883499E-05 -0.00516081943538461" />
+                <geom class="visual" mesh="Rshoulder-roll_Rshoulder-roll" />
+                <body name="Rarm-pitch" pos="0.00124892699365715 -0.0939985234157071 0.000571147438479858">
+                  <inertial pos="-5.86523797540886E-05 -0.0480215847112014 -0.0115614509170335" mass="0.163656043089394" diaginertia="0.000205301785507928 0.000137025660099078 0.000154567593086099" />
+                  <joint name="Rarm-pitch" type="hinge" range="0 0" axis="0 0.999993041789322 -0.00373046551241809" />
+                  <geom class="visual" mesh="Rarm-pitch_Rarm-pitch" />
+                  <body name="Rarm-roll" pos="-0.00124892699365667 -0.0600749118698925 -0.019969050977966">
+                    <inertial pos="0.00117500064437485 -0.0296883325386475 0.00611806709758506" mass="0.790024730889843" diaginertia="0.000626951373773776 0.000565474955147993 0.000724094109271216" />
+                    <joint name="Rarm-roll" type="hinge" range="0 0" axis="-0.999986682697375 1.92523928882734E-05 0.00516081943539328" />
+                    <geom class="visual" mesh="Rarm-roll_Rarm-roll" />
+                    <body name="Rforearm-pitch" pos="0.00118699671361817 -0.0874688267955187 0.00851953486706497">
+                      <inertial pos="-7.39438371644141E-12 -0.0332659563873272 0.000124095077057351" mass="0.0616964140219398" diaginertia="1.71013816255747e-05 1.4645711027657e-05 2.68440203486961e-05" />
+                      <joint name="Rforearm-pitch" type="hinge" range="0 0" axis="0 0.999993041789322 -0.00373046551242672" />
+                      <geom class="visual" mesh="Rforearm-pitch_Rforearm-pitch" />
+                      <body name="Rforearm-yaw" pos="0 -0.0519996381730424 0.000193984206656894">
+                        <inertial pos="-0.00144914299769784 -0.024023819187538 -0.00133242424970514" mass="0.286322539919696" diaginertia="0.000207156464271699 7.94674704834646e-05 0.000207083820030091" />
+                        <joint name="Rforearm-yaw" type="hinge" range="0 0" axis="0.00516085534561842 0.00373041583270884 0.999979724579362" />
+                        <geom class="visual" mesh="Rforearm-yaw_Rforearm-yaw" />
+                        <body name="Rforearm-roll" pos="0 -0.0479996660058844 0.000179062344592917">
+                          <inertial pos="-0.000432292829653728 -0.0218265392717949 -9.51317515698324E-05" mass="0.0776563326897135" diaginertia="2.75633138511378e-05 1.84792179561101e-05 1.89294300843364e-05" />
+                          <joint name="Rforearm-roll" type="hinge" range="0 0" axis="-0.999986682697376 1.92523927639293E-05 0.00516081943529982" />
+                          <geom class="visual" mesh="Rforearm-roll_Rforearm-roll" />
+                          <body name="Rwrist-pitch" pos="-0.000310603277652269 -0.0289997922319544 0.000109786488636632">
+                            <inertial pos="0.000399588449917054 -0.099108422325107 0.00163681066572025" mass="0.0581113383823661" diaginertia="2.27805031940733e-05 1.16579826647684e-05 2.76365481980842e-05" />
+                            <joint name="Rwrist-pitch" type="hinge" range="0 0" axis="0 0.999993041789322 -0.00373046551231421" />
+                            <geom class="visual" mesh="Rwrist-pitch_Rwrist-pitch" />
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+            <body name="Lshoulder-pitch" pos="0.00127140572076783 0.105918012627561 0.245887711508865">
+              <inertial pos="-9.37455533417397E-06 0.0366339168984884 -0.00199140885891902" mass="0.351201337508422" diaginertia="0.000529028510877296 0.000353281271768694 0.000380794448638633" />
+              <joint name="Lshoulder-pitch" type="hinge" range="0 0" axis="0 -0.999993041789322 0.00373046551240926" />
+              <geom class="visual" mesh="Lshoulder-pitch_Lshoulder-pitch" />
+              <body name="Lshoulder-roll" pos="-2.24787271085117E-05 0.0449837042723494 -0.00445218798751273">
+                <inertial pos="0.00207301104207318 0.0271920986739509 0.00097801408904552" mass="0.901300591228606" diaginertia="0.000874808646674644 0.000766264670712621 0.00105459222467771" />
+                <joint name="Lshoulder-roll" type="hinge" range="0 0" axis="-0.999986682697375 1.92523928881331E-05 0.00516081943538374" />
+                <geom class="visual" mesh="Lshoulder-roll_Lshoulder-roll" />
+                <body name="Larm-pitch" pos="0 0.106999255471457 -0.000399159809829575">
+                  <inertial pos="-6.25416723689237E-05 0.0349340834086484 -0.0118708978450517" mass="0.163656024444727" diaginertia="0.000205301678168692 0.000137463543125656 0.000154129771734942" />
+                  <joint name="Larm-pitch" type="hinge" range="0 0" axis="0 -0.999993041789322 0.00373046551243847" />
+                  <geom class="visual" mesh="Larm-pitch_Larm-pitch" />
+                  <body name="Larm-roll" pos="-0.000103217106914702 0.0469250646474482 -0.0201749263706734">
+                    <inertial pos="3.07237365987437E-05 0.0297324322639182 0.00570310540618657" mass="0.790024757738838" diaginertia="0.000626951454863792 0.000564548244316752 0.00072502073772359" />
+                    <joint name="Larm-roll" type="hinge" range="0 0" axis="0.999986682697375 -1.92523928882734E-05 -0.00516081943539824" />
+                    <geom class="visual" mesh="Larm-roll_Larm-roll" />
+                    <body name="Lforearm-pitch" pos="4.12868268756597E-05 0.101529137056791 0.00762119246809084">
+                      <inertial pos="9.4264852867898E-11 0.0192660538330411 -7.18685468062419E-05" mass="0.0616964130134071" diaginertia="1.71013819680551e-05 1.46457108455345e-05 2.68440199012118e-05" />
+                      <joint name="Lforearm-pitch" type="hinge" range="0 0" axis="0 -0.999993041789322 0.00373046551240292" />
+                      <geom class="visual" mesh="Lforearm-pitch_Lforearm-pitch" />
+                      <body name="Lforearm-yaw" pos="0 0.0379997355879942 -0.000141757689466171">
+                        <inertial pos="0.00143438826285103 0.0240131539873873 -0.00152650752821093" mass="0.28632253924729" diaginertia="0.000207149926817268 7.9380835666588e-05 0.000207176993320116" />
+                        <joint name="Lforearm-yaw" type="hinge" range="0 0" axis="-0.00516085534580852 -0.00373041583267726 -0.999979724579361" />
+                        <geom class="visual" mesh="Lforearm-yaw_Lforearm-yaw" />
+                        <body name="Lforearm-roll" pos="0 0.0479996660058964 -0.000179062344588921">
+                          <inertial pos="0.000430442058502199 0.021825205255057 -0.000262424408970063" mass="0.0776563366714877" diaginertia="2.75628437300679e-05 1.8480308623422e-05 1.89288080879214e-05" />
+                          <joint name="Lforearm-roll" type="hinge" range="0 0" axis="-0.999986682697374 1.92523929177407E-05 0.00516081943549098" />
+                          <geom class="visual" mesh="Lforearm-roll_Lforearm-roll" />
+                          <body name="Lwrist-pitch" pos="0.000310603277656869 0.0289997922319544 -0.000109786488636687">
+                            <inertial pos="0.00515818043207492 0.0895589413698149 -0.00833217517594909" mass="0.0804763862959201" diaginertia="3.68663903336892e-05 2.82436939984766e-05 4.58942499829067e-05" />
+                            <joint name="Lwrist-pitch" type="hinge" range="0 0" axis="0 -0.999993041789322 0.00373046551231349" />
+                            <geom class="visual" mesh="Lwrist-pitch_Lwrist-pitch" />
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <asset>
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <mesh name="base_link_base_link" file="meshes/r2-1024/meshes/base_link.STL" />
+    <mesh name="Rhip-pitch_Rhip-pitch" file="meshes/r2-1024/meshes/Rhip-pitch.STL" />
+    <mesh name="Rhip-roll_Rhip-roll" file="meshes/r2-1024/meshes/Rhip-roll.STL" />
+    <mesh name="Rleg-yaw_Rleg-yaw" file="meshes/r2-1024/meshes/Rleg-yaw.STL" />
+    <mesh name="Pknee-pitch_Pknee-pitch" file="meshes/r2-1024/meshes/Pknee-pitch.STL" />
+    <mesh name="Rankle-pitch_Rankle-pitch" file="meshes/r2-1024/meshes/Rankle-pitch.STL" />
+    <mesh name="Rankle-roll_Rankle-roll" file="meshes/r2-1024/meshes/Rankle-roll.STL" />
+    <mesh name="Lhip-pitch_Lhip-pitch" file="meshes/r2-1024/meshes/Lhip-pitch.STL" />
+    <mesh name="Lhip-roll_Lhip-roll" file="meshes/r2-1024/meshes/Lhip-roll.STL" />
+    <mesh name="Lleg-yaw_Lleg-yaw" file="meshes/r2-1024/meshes/Lleg-yaw.STL" />
+    <mesh name="Lknee-pitch_Lknee-pitch" file="meshes/r2-1024/meshes/Lknee-pitch.STL" />
+    <mesh name="Lankle-pitch_Lankle-pitch" file="meshes/r2-1024/meshes/Lankle-pitch.STL" />
+    <mesh name="Lankle-roll_Lankle-roll" file="meshes/r2-1024/meshes/Lankle-roll.STL" />
+    <mesh name="waist-yaw_waist-yaw" file="meshes/r2-1024/meshes/waist-yaw.STL" />
+    <mesh name="waist-roll_waist-roll" file="meshes/r2-1024/meshes/waist-roll.STL" />
+    <mesh name="waist-pitch_waist-pitch" file="meshes/r2-1024/meshes/waist-pitch.STL" />
+    <mesh name="Rshoulder-pitch_Rshoulder-pitch" file="meshes/r2-1024/meshes/Rshoulder-pitch.STL" />
+    <mesh name="Rshoulder-roll_Rshoulder-roll" file="meshes/r2-1024/meshes/Rshoulder-roll.STL" />
+    <mesh name="Rarm-pitch_Rarm-pitch" file="meshes/r2-1024/meshes/Rarm-pitch.STL" inertia="shell" />
+    <mesh name="Rarm-roll_Rarm-roll" file="meshes/r2-1024/meshes/Rarm-roll.STL" />
+    <mesh name="Rforearm-pitch_Rforearm-pitch" file="meshes/r2-1024/meshes/Rforearm-pitch.STL" />
+    <mesh name="Rforearm-yaw_Rforearm-yaw" file="meshes/r2-1024/meshes/Rforearm-yaw.STL" />
+    <mesh name="Rforearm-roll_Rforearm-roll" file="meshes/r2-1024/meshes/Rforearm-roll.STL" />
+    <mesh name="Rwrist-pitch_Rwrist-pitch" file="meshes/r2-1024/meshes/Rwrist-pitch.STL" />
+    <mesh name="Lshoulder-pitch_Lshoulder-pitch" file="meshes/r2-1024/meshes/Lshoulder-pitch.STL" />
+    <mesh name="Lshoulder-roll_Lshoulder-roll" file="meshes/r2-1024/meshes/Lshoulder-roll.STL" />
+    <mesh name="Larm-pitch_Larm-pitch" file="meshes/r2-1024/meshes/Larm-pitch.STL" inertia="shell" />
+    <mesh name="Larm-roll_Larm-roll" file="meshes/r2-1024/meshes/Larm-roll.STL" />
+    <mesh name="Lforearm-pitch_Lforearm-pitch" file="meshes/r2-1024/meshes/Lforearm-pitch.STL" />
+    <mesh name="Lforearm-yaw_Lforearm-yaw" file="meshes/r2-1024/meshes/Lforearm-yaw.STL" />
+    <mesh name="Lforearm-roll_Lforearm-roll" file="meshes/r2-1024/meshes/Lforearm-roll.STL" />
+    <mesh name="Lwrist-pitch_Lwrist-pitch" file="meshes/r2-1024/meshes/Lwrist-pitch.STL" />
+  </asset>
+
+<actuator>
+  <!--  腑部执行器（力矩控制）  -->
+  <motor joint="Lhip-pitch" name="left_hip_pitch" ctrlrange="-105 105"/>
+  <motor joint="Lhip-roll" name="left_hip_roll" ctrlrange="-105 105"/>
+  <motor joint="Lleg-yaw" name="left_leg_yaw" ctrlrange="-105 105"/>
+  <motor joint="Lknee-pitch" name="left_knee" ctrlrange="-135 135"/>
+  <motor joint="Lankle-pitch" name="left_ankle_pitch" ctrlrange="-30 30"/>
+  <motor joint="Lankle-roll" name="left_ankle_roll" ctrlrange="-30 30"/>
+  <!--  右腿关节控制器  -->
+  <motor joint="Rhip-pitch" name="right_hip_pitch" ctrlrange="-105 105"/>
+  <motor joint="Rhip-roll" name="right_hip_roll" ctrlrange="-105 105"/>
+  <motor joint="Rleg-yaw" name="right_leg_yaw" ctrlrange="-105 105"/>
+  <motor joint="Rknee-pitch" name="right_knee" ctrlrange="-135 135"/>
+  <motor joint="Rankle-pitch" name="right_ankle_pitch" ctrlrange="-30 30"/>
+  <motor joint="Rankle-roll" name="right_ankle_roll" ctrlrange="-30 30"/>
+  <!--  腰部执行器  -->
+  <motor joint="waist-yaw" name="waist_yaw" ctrlrange="-105 105"/>
+  <motor joint="waist-roll" name="waist_roll" ctrlrange="-30 30"/>
+  <motor joint="waist-pitch" name="waist_pitch" ctrlrange="-30 30"/>
+  <!--  左臂执行器  -->
+  <motor joint="Lshoulder-pitch" name="left_shoulder_pitch" ctrlrange="-60 60"/>
+  <motor joint="Lshoulder-roll" name="left_shoulder_roll" ctrlrange="-60 60"/>
+  <motor joint="Larm-pitch" name="left_arm_pitch" ctrlrange="-30 30"/>
+  <motor joint="Larm-roll" name="left_arm_roll" ctrlrange="-30 30"/>
+  <motor joint="Lforearm-pitch" name="left_forearm_pitch" ctrlrange="-18 18"/>
+  <motor joint="Lforearm-yaw" name="left_forearm_yaw" ctrlrange="-18 18"/>
+  <motor joint="Lforearm-roll" name="left_forearm_roll" ctrlrange="-18 18"/>
+  <motor joint="Lwrist-pitch" name="left_wrist_pitch" ctrlrange="-18 18"/>
+  <!--  右臂执行器  -->
+  <motor joint="Rshoulder-pitch" name="right_shoulder_pitch" ctrlrange="-60 60"/>
+  <motor joint="Rshoulder-roll" name="right_shoulder_roll" ctrlrange="-60 60"/>
+  <motor joint="Rarm-pitch" name="right_arm_pitch" ctrlrange="-30 30"/>
+  <motor joint="Rarm-roll" name="right_arm_roll" ctrlrange="-30 30"/>
+  <motor joint="Rforearm-pitch" name="right_forearm_pitch" ctrlrange="-18 18"/>
+  <motor joint="Rforearm-yaw" name="right_forearm_yaw" ctrlrange="-18 18"/>
+  <motor joint="Rforearm-roll" name="right_forearm_roll" ctrlrange="-18 18"/>
+  <motor joint="Rwrist-pitch" name="right_wrist_pitch" ctrlrange="-18 18"/>
+</actuator>
+
+
+</mujoco>

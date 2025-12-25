@@ -22,6 +22,7 @@ model = mujoco.MjModel.from_xml_path(dir_path + '/../data/unitree_h1/mjx_scene_h
 data = mujoco.MjData(model)
 mpc_frequency = 50.0
 sim_frequency = 500.0
+# 设置仿真步长
 model.opt.timestep = 1/sim_frequency
 
 # contact_id = []
@@ -32,6 +33,7 @@ model.opt.timestep = 1/sim_frequency
 #     body_id.append(mujoco.mj_name2id(model,mujoco.mjtObj.mjOBJ_BODY,name))
 
 mpc = mpc_wrapper.MPCControllerWrapper(config)
+# 设置初始姿态
 data.qpos = jnp.concatenate([config.p0, config.quat0,config.q0])
 
 from timeit import default_timer as timer
@@ -50,18 +52,23 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         
         qpos = data.qpos.copy()
         qvel = data.qvel.copy()
+        # 判断是否需要更新MPC,
         if counter % (sim_frequency / config.mpc_frequency) == 0 or counter == 0:
             
             if counter != 0:
+                # 延迟补偿
                 for i in range(delay):
                     qpos = data.qpos.copy()
                     qvel = data.qvel.copy()
+                    # 增加阻尼
                     tau_fb = -3*(qvel[6:6+config.n_joints])
                     data.ctrl = tau + tau_fb
                     mujoco.mj_step(model, data)
                     counter += 1
+                    
             start = timer()
-            ref_base_lin_vel = jnp.array([0.3,0,0])
+            # 设置参考速度
+            ref_base_lin_vel = jnp.array([0.0,0,0])
             ref_base_ang_vel = jnp.array([0,0,0.0])
             
 
@@ -70,12 +77,14 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                            1.0])
             
             #set this to the current contact state to use the blind step adaptation
+            # 接触状态 零向量表示不使用真实的接触信息(盲步态自适应模式)
             contact = np.zeros(config.n_contact)
-
             start = timer()
+            if counter == 0:
+                print("首次 MPC 调用，正在编译 JAX 函数，请耐心等待...")
             tau, q, dq = mpc.run(qpos,qvel,input,contact)   
             stop = timer()
-            print(f"Time elapsed: {stop-start}")            
+            print(f"MPC 计算时间: {stop-start:.4f} 秒")            
         counter += 1        
         data.ctrl = tau - 3*qvel[6:6+config.n_joints]
         mujoco.mj_step(model, data)

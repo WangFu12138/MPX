@@ -307,28 +307,53 @@ class MPCControllerWrapper:
         Returns:
             A tuple (tau, q, dq) representing the computed joint torques, joint positions, and joint velocities.
         """
+
+        # ========== 调试点1: 检查输入 ==========
+        print("="*50)
+        print("[调试1] 原始输入检查:")
+        print(f"  qpos 范围: [{qpos.min():.4f}, {qpos.max():.4f}], shape: {qpos.shape}")
+        print(f"  qvel 范围: [{qvel.min():.4f}, {qvel.max():.4f}], shape: {qvel.shape}")
+        print(f"  是否有NaN: qpos={np.any(np.isnan(qpos))}, qvel={np.any(np.isnan(qvel))}")
+        
         self.contact = contact.copy()
         #get forward kinematics for foot position
 
         self.data.qpos = qpos
 
         mujoco.mj_kinematics(self.model, self.data)
+        # mujocoFK获取所有接触点（足端)在世界坐标系中的位置，将其展平为一维数组
+        # self.contact_id[i]从配置中获取的足端几何体ID列表
+        # 再提取足端位置
         foot_op = np.array([self.data.geom_xpos[self.contact_id[i]] for i in range(self.config.n_contact)]).flatten()
+        # ========== 调试点2: 检查足端位置 ==========
+        print(f"[调试2] 足端位置 foot_op: {foot_op}")
+        print(f"  foot_op 范围: [{foot_op.min():.4f}, {foot_op.max():.4f}]")
+        
         #set initial state
         input[6] = self.robot_height
 
+        # 是否将地面反应力作为状态
         if self.config.grf_as_state:
             x0 = jnp.concatenate([qpos, qvel,foot_op,jnp.zeros(3*self.config.n_contact)])
         else:
             x0 = jnp.concatenate([qpos, qvel,foot_op])
-
+        # ========== 调试点3: 检查初始状态 ==========
+        print(f"[调试3] 初始状态 x0:")
+        print(f"  x0 shape: {x0.shape}, 范围: [{x0.min():.4f}, {x0.max():.4f}]")
+        print(f"  是否有NaN: {jnp.any(jnp.isnan(x0))}")
         
         contact = jnp.array(contact)
 
         # Update the timer state for the gait reference.
+        # 为步态指向更新计时器状态
+        # duty_factor占空比，0.7表示70%的时间接触地面
+        # step_freq步频，0.5表示每秒0.5个步态周期
+        # contact_time接触时间，表示当前步态周期中接触地面的时间
+        # mpc_frequency MPC频率，0.1表示每秒10次MPC更新
         des_contact , self.contact_time = self._timer_run(self.duty_factor,self.step_freq,self.contact_time,1/self.mpc_frequency)        
         input = jnp.array(input)
         # Generate reference trajectory and additional MPC parameters.
+        # 未来N步的参考轨迹和约束参数
         reference, parameter, self.liftoff = self._ref_gen(
             duty_factor = self.duty_factor,
             step_freq = self.step_freq,
@@ -336,25 +361,32 @@ class MPCControllerWrapper:
             t_timer = self.contact_time.copy(),
             x = x0,
             foot = foot_op,
-            input = input,
+            input = input,# 用户期望速度/姿态
             liftoff = self.liftoff,
             contact = contact,
             clearence_speed = self.clearence_speed
         )
+        # reference 3(位置) + 4(姿态) + 19(关节) + 3(线速度) + 3(角速度) + 12(足端，未来N+1步中每只脚的期望位置) + 4(接触) + 12(GRFZ方向) = 60
+        # parameter	(26, 4)	4个接触点
+        # liftoff	(12,) 4足×3坐标 历史记录，每只脚离地瞬间的位置
+        print(f"[调试4] 参考轨迹:")
+        print(f"  reference shape: {reference.shape}, 范围: [{reference.min():.4f}, {reference.max():.4f}]")
+        print(f"  parameter shape: {parameter.shape}")
+        print(f"  是否有NaN: ref={jnp.any(jnp.isnan(reference))}, param={jnp.any(jnp.isnan(parameter))}")
 
         # Execute the MPC optimization.
         X, U, V = self._solve(
-            reference,
-            parameter,
-            self.config.W,
-            x0,
-            self.X0,
-            self.U0,
-            self.V0
+            reference, # 期望状态轨迹
+            parameter, # 约束参数
+            self.config.W,# 权重
+            x0, # 初始状态
+            self.X0, # 状态轨迹
+            self.U0, # 控制输入
+            self.V0 # 辅助变量轨迹
             )
 
         # # Warm-start for the next call: shift trajectories forward.
-
+        # 热启动轨迹更新
         self.U0, self.X0, self.V0, tau_temp, q_temp, dq_temp = self.update_and_extract(U, X, V, x0, self.X0, self.U0)
 
         # TO DO change to values from config

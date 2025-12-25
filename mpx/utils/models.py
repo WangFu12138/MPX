@@ -167,6 +167,57 @@ def h1_wb_dynamics(model, mjx_model, contact_id, body_id, n_joints, dt, x, u, t,
     x_next = jnp.concatenate([p, quat, q, v,FL,RL,FR,RR,grf])
     
     return x_next
+def r2_wb_dynamics(model, mjx_model, contact_id, body_id, n_joints, dt, x, u, t, parameter):
+
+    mjx_data = mjx.make_data(model)
+    mjx_data = mjx_data.replace(qpos = x[:n_joints+7], qvel = x[n_joints+7:2*n_joints+13])
+
+    mjx_data = mjx.fwd_position(mjx_model, mjx_data)
+    mjx_data = mjx.fwd_velocity(mjx_model, mjx_data)
+
+    M = mjx_data.qLD
+    D = mjx_data.qfrc_bias
+
+    contact = parameter[t,:4]
+
+    tau = jnp.concatenate([jnp.zeros(6),u])
+
+    FL = mjx_data.geom_xpos[contact_id[0]]
+    RL = mjx_data.geom_xpos[contact_id[1]]
+    FR = mjx_data.geom_xpos[contact_id[2]]
+    RR = mjx_data.geom_xpos[contact_id[3]]
+
+    J_FL, _ = mjx.jac(mjx_model, mjx_data, FL, body_id[0])
+    J_RL, _ = mjx.jac(mjx_model, mjx_data, RL, body_id[0])
+    J_FR, _ = mjx.jac(mjx_model, mjx_data, FR,  body_id[1])
+    J_RR, _ = mjx.jac(mjx_model, mjx_data, RR,  body_id[1])
+    J = jnp.concatenate([J_FL,J_RL,J_FR,J_RR],axis=1)
+    g_dot = J.T @ x[n_joints+7:13+2*n_joints]  # Velocity-level constraint violation
+    
+    alpha = 5
+    # beta = 2*jnp.sqrt(alpha)
+    # Stabilization term
+    baumgarte_term = - 2*alpha * g_dot #- beta * beta * g
+
+    JT_M_invJ = J.T @ jax.scipy.linalg.cho_solve((M, False), J)
+
+
+    rhs = -J.T @ jax.scipy.linalg.cho_solve((M, False),tau - D) + baumgarte_term 
+    epsilon = 1e-3
+    JT_M_invJ_reg = JT_M_invJ + epsilon * jnp.eye(JT_M_invJ.shape[0])
+    cho_JT_M_invJ = jax.scipy.linalg.cho_factor(JT_M_invJ_reg)
+    
+    grf = jax.scipy.linalg.cho_solve(cho_JT_M_invJ,rhs)
+    grf = jnp.concatenate([grf[0:3]*contact[0],grf[3:6]*contact[1],grf[6:9]*contact[2],grf[9:12]*contact[3]])
+    v = x[n_joints+7:13+2*n_joints] + jax.scipy.linalg.cho_solve((M, False),tau - D + J@grf)*dt
+
+    # Semi-implicit Euler integration
+    p = x[:3] + v[:3] * dt
+    quat = math.quat_integrate(x[3:7], v[3:6], dt)
+    q = x[7:7+n_joints] + v[6:6+n_joints] * dt
+    x_next = jnp.concatenate([p, quat, q, v,FL,RL,FR,RR,grf])
+    
+    return x_next
 def talos_wb_dynamics(model, mjx_model, contact_id, body_id, n_joints, dt, x, u, t, parameter):
 
     mjx_data = mjx.make_data(model)

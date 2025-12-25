@@ -60,7 +60,7 @@ pip install -e .
 ## RUN example
 ```
 conda activate mpx_env
-python mpx/examples/mjx_quad.py
+python mpx/examples/mjx_r2.py
 ## Use the keyboard's arrows to control the robot ##
 ```
 
