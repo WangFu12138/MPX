@@ -26,7 +26,9 @@ model.opt.timestep = 1/sim_frequency
 contact_id = []
 for name in config.contact_frame:
     contact_id.append(mujoco.mj_name2id(model,mujoco.mjtObj.mjOBJ_GEOM,name))
+# 初始化MPC控制器
 mpc = mpc_wrapper.MPCControllerWrapper(config)
+# 设置初始状态
 data.qpos = jnp.concatenate([config.p0, config.quat0,config.q0])
 
 from timeit import default_timer as timer
@@ -45,9 +47,11 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         
         qpos = data.qpos.copy()
         qvel = data.qvel.copy()
+        # 每500/50 10个仿真步执行一次MPC
         if counter % (sim_frequency / config.mpc_frequency) == 0 or counter == 0:
             
             if counter != 0:
+                # 模拟MPC计算延迟,期间只使用力反馈控制阻尼关节
                 for i in range(delay):
                     qpos = data.qpos.copy()
                     qvel = data.qvel.copy()
@@ -56,6 +60,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                     mujoco.mj_step(model, data)
                     counter += 1
             start = timer()
+            # 设置参考输入
             ref_base_lin_vel = jnp.array([0.5,0,0])
             ref_base_ang_vel = jnp.array([0,0,0.0])
             

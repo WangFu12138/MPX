@@ -1,9 +1,10 @@
 import jax.numpy as jnp
-import jax 
+import jax
 import mpx.utils.models as mpc_dyn_model
 import mpx.utils.objectives as mpc_objectives
-import os 
-import sys 
+import mpx.utils.mpc_utils as mpc_utils
+import os
+from functools import partial
 dir_path = os.path.dirname(os.path.realpath(__file__))
 model_path = os.path.abspath(os.path.join(dir_path, '..')) + '/data/r2-1024/mjcf/robot.xml'  # Path to the MuJoCo model XML file
 # Joint names and related configuration

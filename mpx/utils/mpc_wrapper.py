@@ -206,17 +206,18 @@ class MPCControllerWrapper:
 
         self.model = mujoco.MjModel.from_xml_path(config.model_path)
         self.data = mujoco.MjData(self.model)
-        mujoco.mj_fwdPosition(self.model, self.data)
-        robot_mass = self.data.qM[0]
-        mjx_model = mjx.put_model(self.model)
+        mujoco.mj_fwdPosition(self.model, self.data)# 正向运动学计算
+        robot_mass = self.data.qM[0]# 获取机器人总质量
+        mjx_model = mjx.put_model(self.model) # 将Mujoco模型转换为MJX模型，支持GPU加速和自动微分
         self.config = config
         self.mpc_frequency = config.mpc_frequency
-        self.shift = int(1 / (config.dt * config.mpc_frequency))
+        self.shift = int(1 / (config.dt * config.mpc_frequency))# 每次更新MPC向前执行的步数 1
 
         # Timer and liftoff states for the reference generator.
         self.foot0 = config.p_legs0.copy()  # Initial foot positions (could be adjusted if needed)
         self.q0 = config.q0.copy()          # Initial joint configuration
 
+        # 是否需要将地面反力作为状态输入
         if self.config.grf_as_state:
             self.initial_state = jnp.concatenate([config.p0, config.quat0,config.q0, jnp.zeros(6+config.n_joints),config.p_legs0,jnp.zeros(3*config.n_contact)])
         else:
@@ -235,12 +236,15 @@ class MPCControllerWrapper:
         self.V0 = jnp.zeros((config.N + 1, config.n))
 
         # Define cost, hessian approximation, and dynamics functions for MPC.
+        # 成本函数绑定,先固定函数的部分参数
         self.cost = partial(config.cost,config.n_joints, config.n_contact, config.N)
+        # Hessian近似函数
         hessian_approx = partial(config.hessian_approx,config.n_joints, config.n_contact)
+        # 动力学函数绑定
         self.dynamics = partial(config.dynamics,
                                 self.model, mjx_model, self.contact_id, self.body_id,
                                 config.n_joints, config.dt)
-
+        # 创建优化求解器
         work = partial(optimizers.mpc, self.cost, self.dynamics, hessian_approx, limited_memory)
 
         reference_generator = partial(mpc_utils.reference_generator,

@@ -131,26 +131,32 @@
         <inertial pos="-0.00254636309481921 0.0432466227241415 -0.0132087299961457" mass="0.386381137343126" diaginertia="0.000557023322800266 0.000420066199291086 0.00040739518569122" />
         <joint name="Lhip-pitch" type="hinge" range="-1.05 1.05" axis="0 1 0" />
         <geom name="Lhip-pitch_visual" class="visual" mesh="Lhip-pitch_Lhip-pitch" material="default_material" />
+        <geom name="Lhip-pitch_collision" class="collision" type="mesh" mesh="Lhip-pitch_collision" contype="2" conaffinity="1" />
         <body name="Lhip-roll" pos="0.0320272336417868 0.0500000000000001 -0.0199563600201637">
           <inertial pos="-0.00651166348866415 0.000823734562451911 -0.0348813012196115" mass="0.212465071618444" diaginertia="0.00031004863568897 0.000338004110916466 0.000320623038936227" />
           <joint name="Lhip-roll" type="hinge" range="-2.05 2.05" axis="-0.999999070885153 0 -0.00136316867310442" />
           <geom name="Lhip-roll_visual" class="visual" mesh="Lhip-roll_Lhip-roll" material="default_material" />
+          <geom name="Lhip-roll_collision" class="collision" type="mesh" mesh="Lhip-roll_collision" contype="2" conaffinity="1" />
           <body name="Lleg-yaw" pos="-0.0239113717374919 0 -0.0650326556556895">
             <inertial pos="-0.00304648888175686 -0.00214822476705481 -0.104161278316881" mass="0.561993600265959" diaginertia="0.00342882830435025 0.00329783254603732 0.000900819979760054" />
             <joint name="Lleg-yaw" type="hinge" range="-2.05 2.05" axis="0.00136316867310442 0 -0.999999070885153" />
             <geom name="Lleg-yaw_visual" class="visual" mesh="Lleg-yaw_Lleg-yaw" material="default_material" />
+            <geom name="Lleg-yaw_collision" class="collision" type="mesh" mesh="Lleg-yaw_collision" contype="2" conaffinity="1" />
             <body name="Lknee-pitch" pos="-0.0117478026460974 -0.00500000000000012 -0.185016186137831">
               <inertial pos="-0.00034114773473138 8.91715773991553E-05 -0.109411813515231" mass="1.80581812965294" diaginertia="0.0258477371297394 0.0263068985117663 0.00182984789955674" />
               <joint name="Lknee-pitch" type="hinge" range="-2.05 2.05" axis="0 -1 0" />
               <geom name="Lknee-pitch_visual" class="visual" mesh="Lknee-pitch_Lknee-pitch" material="default_material" />
+              <geom name="Lknee-pitch_collision" class="collision" type="mesh" mesh="Lknee-pitch_collision" contype="2" conaffinity="1" />
               <body name="Lankle-pitch" pos="0.0222129220563394 0 -0.412470103272612">
                 <inertial pos="-2.64456067233798E-06 -2.43383233011762E-09 -0.00812720824388957" mass="0.0171591478812246" diaginertia="2.45582108116279e-06 3.26464904844395e-06 2.25510633303582e-06" />
                 <joint name="Lankle-pitch" type="hinge" range="-2.05 2.05" axis="0 1 0" />
                 <geom name="Lankle-pitch_visual" class="visual" mesh="Lankle-pitch_Lankle-pitch" material="default_material" />
+                <geom name="Lankle-pitch_collision" class="collision" type="mesh" mesh="Lankle-pitch_collision" contype="2" conaffinity="1" />
                 <body name="Lankle-roll" pos="0 0 -0.0149999999999999">
                   <inertial pos="0.0177048612304101 6.01478156170288E-08 -0.0261609815806904" mass="0.629303892913963" diaginertia="0.000363233257575956 0.00232893464645625 0.00261354084496983" />
                   <joint name="Lankle-roll" type="hinge" range="-2.05 2.05" axis="1 0 0" />
                   <geom name="Lankle-roll_visual" class="visual" mesh="Lankle-roll_Lankle-roll" material="default_material" />
+                  <geom name="Lankle-roll_collision" class="collision" type="mesh" mesh="Lankle-roll_collision" contype="2" conaffinity="1" />
                   <geom name="foot_left_1" pos=".130 0.06 -0.046" size=".005" type="sphere"/>
                   <geom name="foot_left_2" pos=".130 -0.06 -0.046" size=".005" type="sphere"/>
                   <geom name="foot_left_3" pos="-0.094 0.06 -0.046" size=".005" type="sphere"/>
@@ -167,26 +173,32 @@
         <inertial pos="-0.0025168889607323 -0.0466794286103524 -0.0170464249414737" mass="0.337531091535058" diaginertia="0.000472639978064759 0.000360017864797971 0.000358409876213602" />
         <joint name="Rhip-pitch" type="hinge" range="-1.05 1.05" axis="0 -1 0" />
         <geom name="Rhip-pitch_visual" class="visual" mesh="Rhip-pitch_Rhip-pitch" material="default_material" />
+        <geom name="Rhip-pitch_collision" class="collision" type="mesh" mesh="Rhip-pitch_collision" contype="2" conaffinity="1" />
         <body name="Rhip-roll" pos="0.0321289328949669 -0.0499999999999999 -0.0201939142077688">
           <inertial pos="-0.00803774464637705 -0.00101303984157786 -0.0367626564178768" mass="0.604619876832841" diaginertia="0.000867240931618366 0.000954982060712569 0.000888304416437135" />
           <joint name="Rhip-roll" type="hinge" range="-2.05 2.05" axis="-0.999981854966748 0 0.00602409638554543" />
           <geom name="Rhip-roll_visual" class="visual" mesh="Rhip-roll_Rhip-roll" material="default_material" />
+          <geom name="Rhip-roll_collision" class="collision" type="mesh" mesh="Rhip-roll_collision" contype="2" conaffinity="1" />
           <body name="Rleg-yaw" pos="-0.0243911307842633 0 -0.0648542422595855">
             <inertial pos="-0.00312326966809828 0.00213973651422342 -0.103905105276982" mass="1.51191680217784" diaginertia="0.00300966586461575 0.00260974676832353 0.00235519867991485" />
             <joint name="Rleg-yaw" type="hinge" range="-2.05 2.05" axis="-0.00602409638554532 0 -0.999981854966748" />
             <geom name="Rleg-yaw_visual" class="visual" mesh="Rleg-yaw_Rleg-yaw" material="default_material" />
+            <geom name="Rleg-yaw_collision" class="collision" type="mesh" mesh="Rleg-yaw_collision" contype="2" conaffinity="1" />
             <body name="Pknee-pitch" pos="-0.0111142763810016 0.00499999999999955 -0.184936402204994">
               <inertial pos="-0.00115049944926864 8.99871313251588E-05 -0.109396083318006" mass="1.80573124403558" diaginertia="0.0258408754277981 0.0263028229689853 0.00183261634288706" />
               <joint name="Rknee-pitch" type="hinge" range="-2.05 2.05" axis="0 1 0" />
               <geom name="Pknee-pitch_visual" class="visual" mesh="Pknee-pitch_Pknee-pitch" material="default_material" />
+              <geom name="Pknee-pitch_collision" class="collision" type="mesh" mesh="Pknee-pitch_collision" contype="2" conaffinity="1" />
               <body name="Rankle-pitch" pos="0.0191653024840886 0 -0.412622940686401">
                 <inertial pos="-2.64456067249064E-06 -2.43383237175099E-09 -0.00812720824388957" mass="0.0171591478812247" diaginertia="2.4558210811628e-06 3.26464904844394e-06 2.25510633303582e-06" />
                 <joint name="Rankle-pitch" type="hinge" range="-2.05 2.05" axis="0 -1 0" />
                 <geom name="Rankle-pitch_visual" class="visual" mesh="Rankle-pitch_Rankle-pitch" material="default_material" />
+                <geom name="Rankle-pitch_collision" class="collision" type="mesh" mesh="Rankle-pitch_collision" contype="2" conaffinity="1" />
                 <body name="Rankle-roll" pos="0 0 -0.0149999999999999">
                   <inertial pos="0.01770486123041 6.01478156170288E-08 -0.0261609815806908" mass="0.62930389291396" diaginertia="0.000363233257575954 0.00232893464645625 0.00261354084496982" />
                   <joint name="Rankle-roll" type="hinge" range="-2.06 2.06" axis="1 0 0" />
                   <geom name="Rankle-roll_visual" class="visual" mesh="Rankle-roll_Rankle-roll" material="default_material" />
+                  <geom name="Rankle-roll_collision" class="collision" type="mesh" mesh="Rankle-roll_collision" contype="2" conaffinity="1" />
                   <geom name="foot_right_1" pos=".130 0.06 -0.046" size=".005" type="sphere"/>
                   <geom name="foot_right_2" pos=".130 -0.06 -0.046" size=".005" type="sphere"/>
                   <geom name="foot_right_3" pos="-0.094 0.06 -0.046" size=".005" type="sphere"/>
@@ -236,6 +248,20 @@
     <mesh name="Lforearm-yaw_Lforearm-yaw" file="meshes/r2-1024/meshes/Lforearm-yaw.STL" />
     <mesh name="Lforearm-roll_Lforearm-roll" file="meshes/r2-1024/meshes/Lforearm-roll.STL" />
     <mesh name="Lwrist-pitch_Lwrist-pitch" file="meshes/r2-1024/meshes/Lwrist-pitch.STL" />
+
+    <!-- Collision meshes for legs -->
+    <mesh name="Lhip-pitch_collision" file="collison_meshes/Lhip-pitch.STL" />
+    <mesh name="Lhip-roll_collision" file="collison_meshes/Lhip-roll.STL" />
+    <mesh name="Lleg-yaw_collision" file="collison_meshes/Lleg-yaw.STL" />
+    <mesh name="Lknee-pitch_collision" file="collison_meshes/Lknee-pitch.STL" />
+    <mesh name="Lankle-pitch_collision" file="collison_meshes/Lankle-pitch.STL" />
+    <mesh name="Lankle-roll_collision" file="collison_meshes/Lankle-roll.STL" />
+    <mesh name="Rhip-pitch_collision" file="collison_meshes/Rhip-pitch.STL" />
+    <mesh name="Rhip-roll_collision" file="collison_meshes/Rhip-roll.STL" />
+    <mesh name="Rleg-yaw_collision" file="collison_meshes/Rleg-yaw.STL" />
+    <mesh name="Pknee-pitch_collision" file="collison_meshes/Pknee-pitch.STL" />
+    <mesh name="Rankle-pitch_collision" file="collison_meshes/Rankle-pitch.STL" />
+    <mesh name="Rankle-roll_collision" file="collison_meshes/Rankle-roll.STL" />
   </asset>
 
 <actuator>
