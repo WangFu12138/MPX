@@ -312,13 +312,6 @@ class MPCControllerWrapper:
             A tuple (tau, q, dq) representing the computed joint torques, joint positions, and joint velocities.
         """
 
-        # ========== 调试点1: 检查输入 ==========
-        print("="*50)
-        print("[调试1] 原始输入检查:")
-        print(f"  qpos 范围: [{qpos.min():.4f}, {qpos.max():.4f}], shape: {qpos.shape}")
-        print(f"  qvel 范围: [{qvel.min():.4f}, {qvel.max():.4f}], shape: {qvel.shape}")
-        print(f"  是否有NaN: qpos={np.any(np.isnan(qpos))}, qvel={np.any(np.isnan(qvel))}")
-        
         self.contact = contact.copy()
         #get forward kinematics for foot position
 
@@ -329,10 +322,6 @@ class MPCControllerWrapper:
         # self.contact_id[i]从配置中获取的足端几何体ID列表
         # 再提取足端位置
         foot_op = np.array([self.data.geom_xpos[self.contact_id[i]] for i in range(self.config.n_contact)]).flatten()
-        # ========== 调试点2: 检查足端位置 ==========
-        print(f"[调试2] 足端位置 foot_op: {foot_op}")
-        print(f"  foot_op 范围: [{foot_op.min():.4f}, {foot_op.max():.4f}]")
-        
         #set initial state
         input[6] = self.robot_height
 
@@ -341,11 +330,7 @@ class MPCControllerWrapper:
             x0 = jnp.concatenate([qpos, qvel,foot_op,jnp.zeros(3*self.config.n_contact)])
         else:
             x0 = jnp.concatenate([qpos, qvel,foot_op])
-        # ========== 调试点3: 检查初始状态 ==========
-        print(f"[调试3] 初始状态 x0:")
-        print(f"  x0 shape: {x0.shape}, 范围: [{x0.min():.4f}, {x0.max():.4f}]")
-        print(f"  是否有NaN: {jnp.any(jnp.isnan(x0))}")
-        
+
         contact = jnp.array(contact)
 
         # Update the timer state for the gait reference.
@@ -373,10 +358,6 @@ class MPCControllerWrapper:
         # reference 3(位置) + 4(姿态) + 19(关节) + 3(线速度) + 3(角速度) + 12(足端，未来N+1步中每只脚的期望位置) + 4(接触) + 12(GRFZ方向) = 60
         # parameter	(26, 4)	4个接触点
         # liftoff	(12,) 4足×3坐标 历史记录，每只脚离地瞬间的位置
-        print(f"[调试4] 参考轨迹:")
-        print(f"  reference shape: {reference.shape}, 范围: [{reference.min():.4f}, {reference.max():.4f}]")
-        print(f"  parameter shape: {parameter.shape}")
-        print(f"  是否有NaN: ref={jnp.any(jnp.isnan(reference))}, param={jnp.any(jnp.isnan(parameter))}")
 
         # Execute the MPC optimization.
         X, U, V = self._solve(
@@ -491,9 +472,9 @@ class MPCControllerWrapper:
 
             l2_cost = np.sum(g*g)
 
-            if i == 0:
-                print("{:<10} {:<20} {:<20} {:<20}".format("Iter", "Cost", "Constraint", "Time Elapsed"))
-            print("{:<10d} {:<20.5f} {:<20.5f} {:<20.5f}".format(i, l2_cost, np.sum(c*c), stop-start))
+            # if i == 0:
+            #     print("{:<10} {:<20} {:<20} {:<20}".format("Iter", "Cost", "Constraint", "Time Elapsed"))
+            # print("{:<10d} {:<20.5f} {:<20.5f} {:<20.5f}".format(i, l2_cost, np.sum(c*c), stop-start))
             i += 1
 
             if i > max_iter:
