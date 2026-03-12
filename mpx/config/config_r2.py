@@ -23,7 +23,7 @@ mpc_frequency = 50  # Frequency of MPC updates in Hz
 timer_t = jnp.array([0.5,0.5,0.5,0.5,0.0,0.0,0.0,0.0])  # Timer values for each leg
 duty_factor = 0.7  # Duty factor for the gait
 step_freq = 1.2   # Step frequency in Hz
-step_height = 0.08 # Step height in meters
+step_height = 0.08# Step height in meters
 initial_height = 0.65 # Initial height of the robot's base in meters
 robot_height = 0.65  # Height of the robot's base in meters
 
@@ -33,8 +33,8 @@ quat0 = jnp.array([1, 0, 0, 0])  # Initial orientation of the robot's base (quat
 
 q0 = jnp.array([
                 0 ,0 ,0,
-                0 ,0.8 ,0, 0 ,0, 0 ,0, 0,
-                0 ,0.8, 0 ,0, 0 ,0, 0 ,0,
+                0 ,1.30 ,0, 0 ,0, 0 ,0, 0,
+                0 ,1.30, 0 ,0, 0 ,0, 0 ,0,
                 -0.715, 0.00009, -0.00058, -1.18, -0.464, -0.0000731,
                 0.706, -0.0633 ,0.054, 1.16, 0.451, -0.0835
                 ])  # Initial joint angles

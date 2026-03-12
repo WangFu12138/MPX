@@ -9,22 +9,22 @@ conda activate mpx_env
 # ==================== 训练参数配置 ====================
 # 数据相关
 XML_PATH="mpx/data/r2-1024/mjcf/scene_terrain_test.xml"
-BATCH_SIZE=8
-NUM_QUERIES=128
+BATCH_SIZE=128           # GPU目前算力空闲，翻倍Batch Size进一步榨干GPU
+NUM_QUERIES=2048         # 大量增加每个样本的采样点(2048)，让每个场景的梯度更加丰富
 HEIGHTMAP_SIZE=21
 
 # 模型相关
 LATENT_DIM=256
 
 # 优化相关
-EPOCHS=100
+EPOCHS=10000             # 大规模预训练需要极大的Epoch数量
 LR=1e-4
 MSE_WEIGHT=1.0
 EIKONAL_WEIGHT=0.1
 
 # 训练策略
-EIKONAL_EVERY=5          # 每N个epoch计算Eikonal损失
-RANDOMIZE_EVERY=20       # 每N个epoch随机化地形布局 (0禁用)
+EIKONAL_EVERY=1          # 建议每轮都计算平滑度惩罚，防止SDF场出现局部坑洞
+RANDOMIZE_EVERY=5        # 高频随机化地形(每5轮)，逼迫网络学习真正的空间几何而不是死记硬背
 
 # 其他
 SEED=42

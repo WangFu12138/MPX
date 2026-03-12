@@ -1,0 +1,52 @@
+<mujoco model="rough_terrain_scene">
+  <include file="robot.xml"/>
+  <statistic center="0 0 1" extent="1.8"/>
+
+  <!-- 仿真求解器配置 -->
+  <option timestep="0.001" iterations="100" solver="Newton" tolerance="1e-10">
+    <flag warmstart="enable" energy="enable" contact="enable"/>
+  </option>
+
+  <size nconmax="500" njmax="1000"/>
+
+  <!-- 初始姿态配置 - 稍微抬高以适应崎岖地形 -->
+  <keyframe>
+    <key name="home"
+         qpos="0 0 0.7 1 0 0 0
+               -0.707 0.062 -0.0553 -1.17 -0.458 0.0829
+               0.706 -0.0633 0.054 1.16 0.451 -0.0835
+               0 0 0
+               0 0.8 0 0 0 0 0 0
+               0 0.8 0 0 0 0 0 0"
+         ctrl="0 0 0 0 0 0
+               0 0 0 0 0 0
+               0 0 0
+               0 0 0 0 0 0 0 0
+               0 0 0 0 0 0 0 0"/>
+  </keyframe>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="160" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <!-- 纯色地面材质，不使用纹理 -->
+    <material name="ground_terrain" rgba="0.5 0.45 0.35 1" reflectance="0.1" specular="0" shininess="0.1"/>
+
+    <!-- ==================== 崎岖地形高度场 ==================== -->
+    <!-- MuJoCo 3.4.0 需要 4 个值: x_size y_size z_max bottom_offset -->
+    <hfield name="rough_terrain" nrow="64" ncol="64" size="4 4 0.3 0.05"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 3.5" dir="0 0 -1" directional="true"/>
+
+    <!-- 使用高度场替代平面地面 -->
+    <geom name="terrain" type="hfield" hfield="rough_terrain"
+          material="ground_terrain" contype="2" conaffinity="1"/>
+  </worldbody>
+
+</mujoco>

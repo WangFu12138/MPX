@@ -1,0 +1,31 @@
+<mujoco model="terrain测试场景（不含机器人）">
+
+此场景用于测试 SDF预训练的地形感知模块。
+只包含地形boxes，不包含机器人。
+</mujmodel>
+
+<compiler>
+  <!-- 加载模型 -->
+  <compiler>
+    <file name="scene_terrain_boxes.xml"/>
+  </compiler>
+
+  <option>
+    <file name="scene_terrain_only.xml"/>
+    <default>
+      <include file="../scene_terrain_boxes.xml"/>
+    </default>
+  </option>
+</compiler>
+
+<worldbody>
+  <!-- 地面 -->
+  <geom name="floor" type="plane" size="50 50 0.1" rgba="0.9 0.8 1"/>
+
+  <!-- 地形boxes - 使用程序生成 -->
+  ${create_terrain_boxes}
+
+  <!-- 光照 -->
+  <light directional="true" diffuse="true"/>
+</worldbody>
+</mujoco>

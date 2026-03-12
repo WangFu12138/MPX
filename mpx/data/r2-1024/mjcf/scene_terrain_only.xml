@@ -1,0 +1,58 @@
+<mujoco model="terrain_only">
+    <compiler angle="radian"/>
+    <option timestep="0.002" gravity="0 0 -9.81"/>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512"/>
+        <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
+        <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+    </asset>
+
+    <default>
+        <geom friction="1 0.005 0.0001"/>
+    </default>
+
+    <worldbody>
+        <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1" castshadow="false"/>
+        <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>
+        
+        <geom name="floor" type="plane" size="50 50 0.1" rgba="0.9 0.8 1 1" material="matplane"/>
+
+        <!-- The terrain boxes will be generated entirely through Python randomize_terrain -->
+        <!-- Note: randomize_terrain searches for GEOM_BOXes that have a pos<50. 
+             So we need to insert dummy boxes here for it to mutate -->
+        <geom name="dummy_box_1" type="box" size="0.5 0.5 0.1" pos="0 0 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_2" type="box" size="0.5 0.5 0.1" pos="1 0 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_3" type="box" size="0.5 0.5 0.1" pos="0 1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_4" type="box" size="0.5 0.5 0.1" pos="-1 0 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_5" type="box" size="0.5 0.5 0.1" pos="0 -1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_6" type="box" size="0.5 0.5 0.1" pos="1 1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_7" type="box" size="0.5 0.5 0.1" pos="-1 -1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_8" type="box" size="0.5 0.5 0.1" pos="-1 1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_9" type="box" size="0.5 0.5 0.1" pos="1 -1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_10" type="box" size="0.5 0.5 0.1" pos="2 2 0.1" rgba="0.5 0.5 0.5 1"/>
+        
+        <!-- We will generate up to 50 boxes by copy-pasting -->
+        <!-- Just inserting more boxes so randomize_terrain has enough to work with -->
+        <geom name="dummy_box_11" type="box" size="0.5 0.5 0.1" pos="2 1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_12" type="box" size="0.5 0.5 0.1" pos="2 0 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_13" type="box" size="0.5 0.5 0.1" pos="2 -1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_14" type="box" size="0.5 0.5 0.1" pos="2 -2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_15" type="box" size="0.5 0.5 0.1" pos="1 -2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_16" type="box" size="0.5 0.5 0.1" pos="0 -2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_17" type="box" size="0.5 0.5 0.1" pos="-1 -2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_18" type="box" size="0.5 0.5 0.1" pos="-2 -2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_19" type="box" size="0.5 0.5 0.1" pos="-2 -1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_20" type="box" size="0.5 0.5 0.1" pos="-2 0 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_21" type="box" size="0.5 0.5 0.1" pos="-2 1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_22" type="box" size="0.5 0.5 0.1" pos="-2 2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_23" type="box" size="0.5 0.5 0.1" pos="-1 2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_24" type="box" size="0.5 0.5 0.1" pos="0 2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_25" type="box" size="0.5 0.5 0.1" pos="1 2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_26" type="box" size="0.5 0.5 0.1" pos="3 3 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_27" type="box" size="0.5 0.5 0.1" pos="3 2 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_28" type="box" size="0.5 0.5 0.1" pos="3 1 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_29" type="box" size="0.5 0.5 0.1" pos="3 0 0.1" rgba="0.5 0.5 0.5 1"/>
+        <geom name="dummy_box_30" type="box" size="0.5 0.5 0.1" pos="3 -1 0.1" rgba="0.5 0.5 0.5 1"/>
+    </worldbody>
+</mujoco>

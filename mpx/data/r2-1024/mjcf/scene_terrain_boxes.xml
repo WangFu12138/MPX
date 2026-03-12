@@ -1,0 +1,84 @@
+<mujoco model="R2 terrain scene">
+  <!-- Include the robot model -->
+  <include file="robot.xml"/>
+
+  <statistic center="0 0 1" extent="3"/>
+
+  <!-- Simulation solver configuration -->
+  <option timestep="0.001" iterations="100" solver="Newton" tolerance="1e-10">
+    <flag warmstart="enable" energy="enable" contact="enable"/>
+  </option>
+
+  <size nconmax="500" njmax="1000"/>
+
+  <!-- Initial pose configuration -->
+  <keyframe>
+    <key name="home"
+         qpos="0 0 0.865 1 0 0 0
+               -0.707 0.062 -0.0553 -1.17 -0.458 0.0829
+               0.706 -0.0633 0.054 1.16 0.451 -0.0835
+               0 0 0
+               0 0.8 0 0 0 0 0 0
+               0 0.8 0 0 0 0 0 0"
+         ctrl="0 0 0 0 0 0
+               0 0 0 0 0 0
+               0 0 0
+               0 0 0 0 0 0 0 0
+               0 0 0 0 0 0 0 0"/>
+  </keyframe>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="160" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 3.5" dir="0 0 -1" directional="true"/>
+
+    <!-- Ground plane: contype=2, conaffinity=1 (collides with robot) -->
+    <geom name="floor" pos="0 0 0" size="0 0 0.05" type="plane" material="groundplane" contype="2" conaffinity="1"/>
+
+    <!-- Placeholder terrain boxes (will be replaced by terrain generator) -->
+    <!-- Initial positions are far away (100, 100, 10) to be updated dynamically -->
+    <body name="terrain_box_0" pos="100 100 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_1" pos="101 101 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_2" pos="102 102 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_3" pos="103 103 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_4" pos="104 104 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_5" pos="105 105 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_6" pos="106 106 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_7" pos="107 107 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_8" pos="108 108 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <body name="terrain_box_9" pos="109 109 10">
+      <geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/>
+    </body>
+    <!-- Add more boxes as needed, typically 50-100 for complex terrains -->
+  </worldbody>
+
+</mujoco>

@@ -4,7 +4,7 @@
 
   
   <option timestep="0.001" iterations="100" solver="Newton" tolerance="1e-10">
-    <flag warmstart="enable" energy="enable" contact="enable" />
+    <flag warmstart="enable" contact="enable" />
   </option>
   
   

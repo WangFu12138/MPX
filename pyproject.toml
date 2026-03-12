@@ -25,3 +25,69 @@ Homepage = "https://github.com/iit-DLSLab/mpx"
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+# ========== Ruff 配置 ==========
+[tool.ruff]
+# 目标 Python 版本
+target-version = "py38"
+
+# 每行最大字符数
+line-length = 100
+
+# 排除的目录
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "jax_cache",
+]
+
+[tool.ruff.lint]
+# 启用的规则集
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import 排序)
+    "N",   # pep8-naming
+    "UP",  # pyupgrade (升级到新 Python 语法)
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "T20", # flake8-print (禁用 print 语句)
+    "PT",  # flake8-pytest-style
+]
+
+# 忽略的规则
+ignore = [
+    "E501",  # 行太长（由 formatter 处理）
+    "T201",  # 允许使用 print（调试用）
+    "T203",  # 允许使用 pprint
+]
+
+# 每个文件允许的未使用导入数量
+unfixable = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["mpx"]
+
+[tool.ruff.lint.per-file-ignores]
+# 测试文件允许使用 print
+"tests/**/*.py" = ["T201"]
+"mpx/primal_dual_ilqr/tests/**/*.py" = ["T201"]

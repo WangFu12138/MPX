@@ -23,7 +23,6 @@ from mpx.sdf_pretrain.data.transforms import (
     get_camera_transforms,
     local_to_global_points_jax,
     global_to_local_points_numpy,
-    sample_local_queries,
 )
 from mpx.sdf_pretrain.data.analytical_sdf import (
     parse_xml_to_boxes,
@@ -76,8 +75,12 @@ class SDFOnlineGenerator:
         self.view_bounds = view_bounds
         self.floor_height = floor_height
 
-        # Load MuJoCo model
-        self.mj_model = mujoco.MjModel.from_xml_path(xml_path)
+        # Load MuJoCo model (不含机器人)
+        terrain_xml = self._get_terrain_only_path()
+        if not os.path.exists(terrain_xml):
+            raise FileNotFoundError(f"Terrain scene not found: {terrain_xml}")
+
+        self.mj_model = mujoco.MjModel.from_xml_path(terrain_xml)
         self.mj_data = mujoco.MjData(self.mj_model)
         # CRITICAL: must call mj_forward to initialize geometry positions,
         # collision tree, and kinematics BEFORE transferring to MJX.
@@ -114,6 +117,172 @@ class SDFOnlineGenerator:
                 })
         self.boxes_info = boxes
 
+    def _get_terrain_only_path(self) -> str:
+        """Get the path to the terrain-only XML file.
+        Returns the path to scene_terrain_only.xml in the same directory as xml_path,
+        or falls back to xml_path if not found.
+        """
+        dir_name = os.path.dirname(self.xml_path)
+        terrain_only = os.path.join(dir_name, "scene_terrain_only.xml")
+        if os.path.exists(terrain_only):
+            return terrain_only
+        return self.xml_path
+
+    def batch_ray_cast_to_surface(self, xy_points: jnp.ndarray) -> jnp.ndarray:
+        """Batch ray cast to get surface height at multiple xy locations.
+
+        Uses vmap for parallel ray casting instead of slow loops.
+        Uses same geomgroup as heightmap to exclude robot parts.
+
+        Args:
+            xy_points: (N, 2) array of (x, y) coordinates in world frame
+
+        Returns:
+            (N,) array of Z heights (surface height at each xy)
+        """
+        N = xy_points.shape[0]
+        ray_origin_z = 5.0  # Start rays from high above
+
+        # Create ray origins: (N, 3) with z = 5.0
+        ray_origins = jnp.concatenate([
+            xy_points,
+            jnp.full((N, 1), ray_origin_z)
+        ], axis=-1)
+
+        # Ray direction: straight down
+        ray_dir = jnp.array([0.0, 0.0, -1.0])
+
+        # Use geomgroup that ONLY checks group 0 (terrain boxes)
+        # This excludes robot parts (group 2) and other objects
+        geomgroup = (1, 0, 0, 0, 0, 0)
+
+        # vmap over ray origins for batch ray casting
+        def single_ray(origin):
+            dist, _ = mjx.ray(self.mjx_model, self.mjx_data, origin, ray_dir, geomgroup)
+            return dist
+
+        dists = jax.vmap(single_ray)(ray_origins)
+
+        # Compute surface z: ray_origin_z - dist
+        # If dist < 0 (no hit), use floor_height
+        surface_z = jnp.where(
+            dists > 0,
+            ray_origin_z - dists,
+            self.floor_height
+        )
+
+        return surface_z
+
+    def sample_queries_with_terrain(self, key: jax.Array, lidar_pose: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
+        """Sample query points based on actual terrain height.
+
+        3-tier sampling strategy (uniform, near-surface, edge):
+        1. Sample xy locations (different strategies)
+        2. Ray cast to get surface height z0 at each xy
+        3. Sample z above the surface (z0 + margin to sensor_z)
+
+        Args:
+            key: JAX random key
+            lidar_pose: (6,) array [x, y, z, roll, pitch, yaw]
+
+        Returns:
+            Tuple of (queries_local, queries_global), each (N, 3)
+        """
+        num_points = self.num_queries_per_sample
+        x_min, x_max, y_min, y_max, z_min, z_max = self.view_bounds
+
+        # Split points among three strategies
+        n_uniform = int(num_points * 0.2)
+        n_surface = int(num_points * 0.5)
+        n_edge = num_points - n_uniform - n_surface
+
+        # Generate random keys
+        keys = jax.random.split(key, 15)
+
+        # ========== 1. Sample LOCAL xy (三种策略) ==========
+
+        # Uniform xy (20%)
+        ux = jax.random.uniform(keys[0], (n_uniform,), minval=x_min, maxval=x_max)
+        uy = jax.random.uniform(keys[1], (n_uniform,), minval=y_min, maxval=y_max)
+
+        # Near-surface xy (50%) - uniform distribution
+        sx = jax.random.uniform(keys[2], (n_surface,), minval=x_min, maxval=x_max)
+        sy = jax.random.uniform(keys[3], (n_surface,), minval=y_min, maxval=y_max)
+
+        # Edge xy (30%) - near boundaries
+        edge_side_x = jax.random.bernoulli(keys[4], 0.5, (n_edge,))
+        ex = jnp.where(edge_side_x, x_max - 0.05, x_min + 0.05)
+        ex = ex + jax.random.normal(keys[5], (n_edge,)) * 0.05
+        ex = jnp.clip(ex, x_min, x_max)
+
+        edge_side_y = jax.random.bernoulli(keys[6], 0.5, (n_edge,))
+        ey = jnp.where(edge_side_y, y_max - 0.05, y_min + 0.05)
+        ey = ey + jax.random.normal(keys[7], (n_edge,)) * 0.05
+        ey = jnp.clip(ey, y_min, y_max)
+
+        # Concatenate all local xy
+        all_local_xy = jnp.concatenate([
+            jnp.stack([ux, uy], axis=-1),
+            jnp.stack([sx, sy], axis=-1),
+            jnp.stack([ex, ey], axis=-1)
+        ], axis=0)  # (N, 2)
+
+        # ========== 2. 转换为全局 xy ==========
+        T_lidar_to_world = get_camera_transforms(np.array(lidar_pose))[0]
+
+        # Transform local xy to global xy
+        # local_xy is (N, 2), need to add z=0 for transformation
+        local_xy_homo = jnp.concatenate([
+            all_local_xy,
+            jnp.zeros((num_points, 1)),
+            jnp.ones((num_points, 1))
+        ], axis=-1)  # (N, 4) homogeneous
+
+        global_xy_homo = (T_lidar_to_world @ local_xy_homo.T).T  # (N, 4)
+        global_xy = global_xy_homo[:, :2]  # (N, 2)
+
+        # ========== 3. 批量 ray cast 获取表面高度 ==========
+        surface_z = self.batch_ray_cast_to_surface(global_xy)  # (N,)
+
+        # ========== 4. 基于 surface_z 采样 z ==========
+        sensor_z = lidar_pose[2]
+        margin = 0.02  # 2cm above surface
+
+        # Uniform sampling: surface to sensor (full range)
+        uz = jax.random.uniform(
+            keys[8], (n_uniform,),
+            minval=jnp.clip(surface_z[:n_uniform] + margin, z_min, sensor_z),
+            maxval=sensor_z
+        )
+
+        # Near-surface sampling: dense near surface (0.1m range)
+        sz = jax.random.uniform(
+            keys[9], (n_surface,),
+            minval=jnp.clip(surface_z[n_uniform:n_uniform+n_surface] + margin, z_min, sensor_z),
+            maxval=jnp.clip(surface_z[n_uniform:n_uniform+n_surface] + 0.1, z_min, sensor_z)
+        )
+
+        # Edge sampling: near surface with larger range (0.15m)
+        ez = jax.random.uniform(
+            keys[10], (n_edge,),
+            minval=jnp.clip(surface_z[n_uniform+n_surface:] + margin, z_min, sensor_z),
+            maxval=jnp.clip(surface_z[n_uniform+n_surface:] + 0.15, z_min, sensor_z)
+        )
+
+        # Concatenate all z
+        all_z = jnp.concatenate([uz, sz, ez])  # (N,)
+
+        # ========== 5. 组合查询点 ==========
+        # Global queries
+        queries_global = jnp.concatenate([global_xy, all_z[:, None]], axis=-1)  # (N, 3)
+
+        # Transform to local frame
+        T_world_to_lidar = get_camera_transforms(np.array(lidar_pose))[1]
+        queries_local = global_to_local_points_numpy(np.array(queries_global), T_world_to_lidar)
+        queries_local = jnp.array(queries_local)
+
+        return queries_local, queries_global
+
     def randomize_terrain(self, key: jax.Array):
         """Randomize the terrain by modifying box sizes and positions.
 
@@ -142,9 +311,9 @@ class SDFOnlineGenerator:
             sz = np.random.uniform(0.01, 0.1)
             self.mj_model.geom_size[geom_id] = [sx, sy, sz]
 
-            # Randomize Position
-            px = np.random.uniform(-8.0, 8.0)
-            py = np.random.uniform(-8.0, 8.0)
+            # Randomize Position (Keep tight within lidar's central view)
+            px = np.random.uniform(-3.0, 3.0)
+            py = np.random.uniform(-3.0, 3.0)
             pz = sz
             self.mj_model.geom_pos[geom_id] = [px, py, pz]
 
@@ -176,8 +345,13 @@ class SDFOnlineGenerator:
         """
         keys = jax.random.split(key, 6)
 
-        x = jax.random.uniform(keys[0], (batch_size,), minval=-1.0, maxval=1.0)
-        y = jax.random.uniform(keys[1], (batch_size,), minval=-1.0, maxval=1.0)
+        # Force LiDAR to spawn directly above the generated terrain cluster
+        # The randomize_terrain function places boxes within [-3.0, 3.0]
+        x_range = 2.5
+        y_range = 2.5
+        
+        x = jax.random.uniform(keys[0], (batch_size,), minval=-x_range, maxval=x_range)
+        y = jax.random.uniform(keys[1], (batch_size,), minval=-y_range, maxval=y_range)
         z = jax.random.uniform(keys[2], (batch_size,),
                               minval=self.lidar_height_range[0],
                               maxval=self.lidar_height_range[1])
@@ -231,52 +405,12 @@ class SDFOnlineGenerator:
 
         return jnp.array(heightmaps)
 
-    def get_surface_height_at_xy(self, xy_points: np.ndarray) -> np.ndarray:
-        """Get the highest obstacle Z at given (x, y) coordinates using MuJoCo ray cast.
-
-        Uses mjx.ray to cast rays from above straight down to find the surface height.
-
-        Args:
-            xy_points: (N, 2) array of (x, y) coordinates in world frame
-
-        Returns:
-            (N,) array of Z heights (highest obstacle at each xy)
-        """
-        N = xy_points.shape[0]
-        z_heights = np.zeros(N)
-
-        # Ray cast from high above (z=5.0) straight down
-        ray_origin_z = 5.0
-        ray_dir = jnp.array([0.0, 0.0, -1.0])  # pointing down
-
-        for i in range(N):
-            x, y = xy_points[i]
-            ray_origin = jnp.array([x, y, ray_origin_z])
-
-            # Use mjx.ray to find intersection
-            # mjx.ray returns (dist, geom_id) tuple
-            dist, geom_id = mjx.ray(
-                self.mjx_model,
-                self.mjx_data,
-                ray_origin,
-                ray_dir,
-                None  # geomgroup=None means check all geoms
-            )
-
-            # dist is the distance along ray direction to the first intersection
-            # Since ray points down, intersection z = ray_origin_z - dist
-            # dist < 0 means no intersection
-            if float(dist) > 0:
-                z_heights[i] = float(ray_origin_z - dist)
-            else:
-                # No intersection, use floor height
-                z_heights[i] = self.floor_height
-
-        return z_heights
-
     def generate_batch(self, key: jax.Array, batch_size: int) -> Dict[str, jnp.ndarray]:
         """
         Generate a complete training batch.
+
+        Uses terrain-aware sampling: queries are sampled ABOVE the actual surface,
+        guaranteeing positive SDF values (free space).
 
         Args:
             key: JAX random key
@@ -296,27 +430,20 @@ class SDFOnlineGenerator:
         # 2. Generate heightmaps
         heightmaps = self.generate_heightmaps(key2, lidar_poses)
 
-        # 3. Sample query points (Local frame)
-        # Using the smart sampling strategy (uniform + near-surface + edges)
+        # 3. Sample query points using terrain-aware strategy
         queries_local_list = []
+        queries_global_list = []
         keys = jax.random.split(key3, batch_size)
+
         for i in range(batch_size):
-            q_local = sample_local_queries(keys[i], self.num_queries_per_sample, self.view_bounds)
+            q_local, q_global = self.sample_queries_with_terrain(keys[i], lidar_poses[i])
             queries_local_list.append(q_local)
-        
+            queries_global_list.append(q_global)
+
         queries_local = jnp.stack(queries_local_list, axis=0)
+        queries_global = jnp.stack(queries_global_list, axis=0)
 
-        # 4. Transform queries to global frame for ground truth calculation
-        all_queries_global = []
-        # 把局部的采样点转换到全局坐标系下计算SDF
-        for i in range(batch_size):
-            T = get_camera_transforms(np.array(lidar_poses[i]))[0]
-            q_global = local_to_global_points_jax(jnp.array(queries_local[i]), T)
-            all_queries_global.append(q_global)
-
-        queries_global = jnp.stack(all_queries_global, axis=0)
-
-        # 5. Compute structural SDF
+        # 4. Compute ground truth SDF
         sdfs = get_ground_truth_sdf_with_floor(
             queries_global.reshape(-1, 3),
             self.boxes_info,
@@ -328,7 +455,7 @@ class SDFOnlineGenerator:
             'heightmap': heightmaps,
             'queries_local': queries_local,
             'sdf': sdfs,
-            'queries_global': queries_global, # Optional, for debugging
+            'queries_global': queries_global,
             'lidar_pose': lidar_poses,
         }
 
