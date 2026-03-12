@@ -122,14 +122,20 @@ class SDFDynamicGenerator:
         # Create placeholder boxes XML
         boxes_xml = []
         for i in range(self.max_boxes):
-            boxes_xml.append(f'<body name="box_{i}" pos="{100+i} {100+i} 10"><geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1"/></body>')
+            boxes_xml.append(f'<body name="box_{i}" pos="{100+i} {100+i} 10"><geom type="box" size="0.1 0.1 0.1" contype="2" conaffinity="1" rgba="0.6 0.4 0.2 1"/></body>')
 
-        # Create XML string for template model
+        # Create XML string for template model with proper asset definitions
+        # Add a dummy free joint to worldbody so MJX forward() works
         xml_template = """<mujoco model="terrain_template">
   <option timestep="0.001" iterations="1" solver="Newton"/>
   <size nconmax="500" njmax="1000" />
+  <asset>
+    <texture name="texplane" type="2d" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.1 0.15 0.2" width="512" height="512"/>
+    <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+  </asset>
   <worldbody>
-    <geom name="floor" type="plane" size="50 50 0.1" rgba="0.9 0.8 0.8 1"/>
+    <geom name="floor" type="plane" size="50 50 0.1" material="matplane"/>
+    <body name="dummy"><freejoint/><geom type="sphere" size="0.001" pos="0 0 100"/></body>
     """ + "\n".join(boxes_xml) + """
     <light pos="0 0 3.5" dir="0 0 -1" directional="true" />
   </worldbody>
@@ -170,25 +176,28 @@ class SDFDynamicGenerator:
         Args:
             terrain_data: Array of shape (num_boxes, 10) with [pos, quat, size]
         """
-        num_boxes = terrain_data.shape[0]
-        body_ids = jnp.arange(self.body_id_offset, self.body_id_offset + num_boxes)
-        geom_ids = jnp.arange(self.geom_id_offset, self.geom_id_offset + num_boxes)
+        num_boxes = min(terrain_data.shape[0], self.max_boxes)
+        body_ids = np.arange(self.body_id_offset, self.body_id_offset + num_boxes)
+        geom_ids = np.arange(self.geom_id_offset, self.geom_id_offset + num_boxes)
 
-        # Extract data
-        positions = jnp.array(terrain_data[:, :3])
-        quaternions = jnp.array(terrain_data[:, 3:7])
-        sizes = jnp.array(terrain_data[:, 7:])
+        # Update CPU model first
+        for i, (body_id, geom_id) in enumerate(zip(body_ids, geom_ids)):
+            if i >= len(terrain_data):
+                break
+            pos = terrain_data[i, :3]
+            quat = terrain_data[i, 3:7]
+            size = terrain_data[i, 7:]
 
-        # Update body positions and quaternions
-        self.mjx_model = self.mjx_model.tree_replace({
-            'body_pos': self.mjx_model.body_pos.at[body_ids].set(positions),
-            'body_quat': self.mjx_model.body_quat.at[body_ids].set(quaternions),
-            'geom_size': self.mjx_model.geom_size.at[geom_ids].set(sizes),
-        })
+            self.mj_model.body_pos[body_id] = pos
+            self.mj_model.body_quat[body_id] = quat
+            self.mj_model.geom_size[geom_id] = size
 
-        # Update mjx_data by re-running forward kinematics
-        # Note: For ray casting, we need the global positions
-        # mjx.forward handles this automatically
+        # Run forward kinematics on CPU
+        mujoco.mj_forward(self.mj_model, self.mj_data)
+
+        # Re-create MJX model and data with updated geometry
+        self.mjx_model = mjx.put_model(self.mj_model)
+        self.mjx_data = mjx.put_data(self.mj_model, self.mj_data)
 
     def set_curriculum_level(self, level: int):
         """Set curriculum level for terrain difficulty.
@@ -224,9 +233,8 @@ class SDFDynamicGenerator:
         geomgroup = (1, 0, 0, 0, 0, 0)
 
         def single_ray(origin):
-            # Run forward kinematics first to update positions
-            data = mjx.forward(self.mjx_model, self.mjx_data)
-            dist, _ = mjx.ray(self.mjx_model, data, origin, ray_dir, geomgroup)
+            # Use mjx_data directly - kinematics already computed when model was created
+            dist, _ = mjx.ray(self.mjx_model, self.mjx_data, origin, ray_dir, geomgroup)
             return dist
 
         dists = jax.vmap(single_ray)(ray_origins)

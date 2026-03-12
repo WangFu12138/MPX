@@ -91,8 +91,8 @@ class DynamicTerrainManager:
             render=False
         )
 
-        # Generate WFC map
-        wave = generate_14(size=cfg.size, test=False)
+        # Generate WFC map - use test=True to ensure center is initialized
+        wave = generate_14(size=cfg.size, test=True)
 
         # Create position grid
         grid = create_centered_grid(cfg.size, tg.length)
@@ -101,6 +101,17 @@ class DynamicTerrainManager:
         for i in range(grid.shape[0]):
             for j in range(grid.shape[1]):
                 addElement(tg, wave[i, j], grid[i, j])
+
+        # If no boxes generated, create a simple fallback terrain
+        if tg.count_boxes == 0:
+            print("Warning: WFC generated 0 boxes, using fallback terrain")
+            # Create simple stairs as fallback
+            for i in range(3):
+                for k in range(cfg.size):
+                    x = (k - cfg.size // 2) * tg.length
+                    y = (i - 1) * 0.5
+                    z = (k + 1) * step_height / 2
+                    tg.AddBox([x, y, z / 2], [0, 0, 0], [tg.width, 0.5, z])
 
         # Convert box_data to boxes_info format
         boxes_info = []
