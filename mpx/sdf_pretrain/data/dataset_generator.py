@@ -63,7 +63,7 @@ class SDFDynamicGenerator:
                  heightmap_resolution: float = 0.05,
                  num_queries_per_sample: int = 1024,
                  lidar_height_range: Tuple[float, float] = (0.4, 0.8),
-                 view_bounds: Tuple[float, float, float, float, float, float] = (-0.5, 0.5, -0.5, 0.5, -0.3, 0.5),
+                 view_bounds: Tuple[float, float, float, float, float, float] = (-0.5, 0.5, -0.5, 0.5, 0.01, 0.5),
                  floor_height: float = 0.0,
                  terrain_config: Optional[TerrainConfig] = None,
                  use_curriculum: bool = False):
@@ -247,8 +247,130 @@ class SDFDynamicGenerator:
 
         return surface_z
 
+    def sample_queries_batched(self, key: jax.Array, lidar_poses: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
+        """Batch sample query points for multiple LiDAR poses.
+
+        This method processes all samples in parallel using JAX vmap,
+        avoiding Python loops and enabling single JIT compilation.
+
+        采样策略 (表面重要性采样):
+          - 10% 内部:  Z = surface_z - [0, 0.10]     → SDF < 0 (穿模检测)
+          - 70% 表面:  Z = surface_z ± 0.05          → SDF ≈ 0 (核心区域)
+          - 20% 外部:  Z = surface_z + [0.05, 0.50]  → SDF > 0 (全局引导)
+
+        Args:
+            key: JAX random key
+            lidar_poses: (batch_size, 6) array of LiDAR poses
+
+        Returns:
+            Tuple of (queries_local, queries_global), each (batch_size, N, 3)
+        """
+        batch_size = lidar_poses.shape[0]
+        num_points = self.num_queries_per_sample
+        x_min, x_max, y_min, y_max, z_min, z_max = self.view_bounds
+
+        # 采样比例: 10% 内部, 70% 表面, 20% 外部
+        n_inside = int(num_points * 0.10)    # 10% 内部点
+        n_surface = int(num_points * 0.70)   # 70% 表面附近点
+        n_outside = num_points - n_inside - n_surface  # 20% 外部点
+
+        # Split keys for different sampling strategies
+        key, *subkeys = jax.random.split(key, 12)
+
+        # 1. Batch sample LOCAL xy coordinates (pure JAX, no loops)
+        # 内部采样 XY: (batch, n_inside)
+        inside_x = jax.random.uniform(subkeys[0], (batch_size, n_inside), minval=x_min, maxval=x_max)
+        inside_y = jax.random.uniform(subkeys[1], (batch_size, n_inside), minval=y_min, maxval=y_max)
+
+        # 表面采样 XY: (batch, n_surface)
+        surface_x = jax.random.uniform(subkeys[2], (batch_size, n_surface), minval=x_min, maxval=x_max)
+        surface_y = jax.random.uniform(subkeys[3], (batch_size, n_surface), minval=y_min, maxval=y_max)
+
+        # 外部采样 XY: (batch, n_outside)
+        outside_x = jax.random.uniform(subkeys[4], (batch_size, n_outside), minval=x_min, maxval=x_max)
+        outside_y = jax.random.uniform(subkeys[5], (batch_size, n_outside), minval=y_min, maxval=y_max)
+
+        # Combine: (batch, N, 2)
+        all_local_xy = jnp.concatenate([
+            jnp.stack([inside_x, inside_y], axis=-1),
+            jnp.stack([surface_x, surface_y], axis=-1),
+            jnp.stack([outside_x, outside_y], axis=-1)
+        ], axis=1)
+
+        # 2. Batch transform to global xy
+        # Pre-compute all transform matrices
+        T_lidar_to_world_list = []
+        T_world_to_lidar_list = []
+        for i in range(batch_size):
+            T_l2w, T_w2l = get_camera_transforms(np.array(lidar_poses[i]))
+            T_lidar_to_world_list.append(T_l2w)
+            T_world_to_lidar_list.append(T_w2l)
+
+        # Transform each sample's local xy to global xy
+        global_xy_list = []
+        for i in range(batch_size):
+            local_xy = all_local_xy[i]  # (N, 2)
+            T = T_lidar_to_world_list[i]
+
+            local_xy_homo = jnp.concatenate([
+                local_xy,
+                jnp.zeros((num_points, 1)),
+                jnp.ones((num_points, 1))
+            ], axis=-1)
+
+            global_xy_homo = (T @ local_xy_homo.T).T
+            global_xy_list.append(global_xy_homo[:, :2])
+
+        global_xy = jnp.stack(global_xy_list, axis=0)  # (batch, N, 2)
+
+        # 3. Batch ray cast for surface heights
+        global_xy_flat = global_xy.reshape(-1, 2)  # (batch*N, 2)
+        surface_z_flat = self.batch_ray_cast_to_surface(global_xy_flat)
+        surface_z = surface_z_flat.reshape(batch_size, num_points)  # (batch, N)
+
+        # 4. Batch sample z coordinates (新的采样策略)
+        sensor_z = lidar_poses[:, 2]  # (batch,)
+
+        # 内部点 Z: surface_z - [0, 0.10] → SDF < 0
+        inside_z_offset = jax.random.uniform(subkeys[6], (batch_size, n_inside), minval=0.0, maxval=0.10)
+        inside_z = surface_z[:, :n_inside] - inside_z_offset
+
+        # 表面附近 Z: surface_z ± 0.05 → SDF ≈ 0
+        surface_z_offset = jax.random.uniform(subkeys[7], (batch_size, n_surface), minval=-0.05, maxval=0.05)
+        surface_z_pts = surface_z[:, n_inside:n_inside+n_surface] + surface_z_offset
+
+        # 外部点 Z: surface_z + [0.05, 0.50] → SDF > 0
+        outside_z_offset = jax.random.uniform(subkeys[8], (batch_size, n_outside), minval=0.05, maxval=0.50)
+        outside_z = surface_z[:, n_inside+n_surface:] + outside_z_offset
+        # 限制不超过传感器高度
+        outside_z = jnp.minimum(outside_z, jnp.broadcast_to(sensor_z[:, None], (batch_size, n_outside)))
+
+        # Combine z: (batch, N)
+        all_z = jnp.concatenate([inside_z, surface_z_pts, outside_z], axis=1)
+
+        # 5. Combine queries: (batch, N, 3)
+        queries_global = jnp.concatenate([global_xy, all_z[:, :, None]], axis=-1)
+
+        # 6. Batch convert to local coordinates (不再做SDF正数校验)
+        queries_local_list = []
+        for i in range(batch_size):
+            queries_l = global_to_local_points_numpy(
+                np.array(queries_global[i]),
+                T_world_to_lidar_list[i]
+            )
+            queries_local_list.append(jnp.array(queries_l))
+
+        queries_local = jnp.stack(queries_local_list, axis=0)
+
+        return queries_local, queries_global
+
     def sample_queries_with_terrain(self, key: jax.Array, lidar_pose: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
         """Sample query points based on actual terrain height.
+
+        采样策略 (表面重要性采样):
+          - 10% 内部:  Z = surface_z - [0, 0.10]     → SDF < 0 (穿模检测)
+          - 70% 表面:  Z = surface_z ± 0.05          → SDF ≈ 0 (核心区域)
+          - 20% 外部:  Z = surface_z + [0.05, 0.50]  → SDF > 0 (全局引导)
 
         Args:
             key: JAX random key
@@ -260,34 +382,30 @@ class SDFDynamicGenerator:
         num_points = self.num_queries_per_sample
         x_min, x_max, y_min, y_max, z_min, z_max = self.view_bounds
 
-        # Split points among strategies
-        n_uniform = int(num_points * 0.2)
-        n_surface = int(num_points * 0.5)
-        n_edge = num_points - n_uniform - n_surface
+        # 采样比例: 10% 内部, 70% 表面, 20% 外部
+        n_inside = int(num_points * 0.10)    # 10% 内部点
+        n_surface = int(num_points * 0.70)   # 70% 表面附近点
+        n_outside = num_points - n_inside - n_surface  # 20% 外部点
 
         keys = jax.random.split(key, 15)
 
-        # 1. Sample LOCAL xy (three strategies)
-        ux = jax.random.uniform(keys[0], (n_uniform,), minval=x_min, maxval=x_max)
-        uy = jax.random.uniform(keys[1], (n_uniform,), minval=y_min, maxval=y_max)
+        # 1. Sample LOCAL xy (三种采样策略)
+        # 内部采样 XY
+        inside_x = jax.random.uniform(keys[0], (n_inside,), minval=x_min, maxval=x_max)
+        inside_y = jax.random.uniform(keys[1], (n_inside,), minval=y_min, maxval=y_max)
 
-        sx = jax.random.uniform(keys[2], (n_surface,), minval=x_min, maxval=x_max)
-        sy = jax.random.uniform(keys[3], (n_surface,), minval=y_min, maxval=y_max)
+        # 表面采样 XY
+        surface_x = jax.random.uniform(keys[2], (n_surface,), minval=x_min, maxval=x_max)
+        surface_y = jax.random.uniform(keys[3], (n_surface,), minval=y_min, maxval=y_max)
 
-        edge_side_x = jax.random.bernoulli(keys[4], 0.5, (n_edge,))
-        ex = jnp.where(edge_side_x, x_max - 0.05, x_min + 0.05)
-        ex = ex + jax.random.normal(keys[5], (n_edge,)) * 0.05
-        ex = jnp.clip(ex, x_min, x_max)
-
-        edge_side_y = jax.random.bernoulli(keys[6], 0.5, (n_edge,))
-        ey = jnp.where(edge_side_y, y_max - 0.05, y_min + 0.05)
-        ey = ey + jax.random.normal(keys[7], (n_edge,)) * 0.05
-        ey = jnp.clip(ey, y_min, y_max)
+        # 外部采样 XY
+        outside_x = jax.random.uniform(keys[4], (n_outside,), minval=x_min, maxval=x_max)
+        outside_y = jax.random.uniform(keys[5], (n_outside,), minval=y_min, maxval=y_max)
 
         all_local_xy = jnp.concatenate([
-            jnp.stack([ux, uy], axis=-1),
-            jnp.stack([sx, sy], axis=-1),
-            jnp.stack([ex, ey], axis=-1)
+            jnp.stack([inside_x, inside_y], axis=-1),
+            jnp.stack([surface_x, surface_y], axis=-1),
+            jnp.stack([outside_x, outside_y], axis=-1)
         ], axis=0)
 
         # 2. Transform to global xy
@@ -305,33 +423,29 @@ class SDFDynamicGenerator:
         # 3. Batch ray cast for surface heights
         surface_z = self.batch_ray_cast_to_surface(global_xy)
 
-        # 4. Sample z based on surface_z
+        # 4. Sample z coordinates (新的采样策略)
         sensor_z = lidar_pose[2]
-        margin = 0.02
 
-        uz = jax.random.uniform(
-            keys[8], (n_uniform,),
-            minval=jnp.clip(surface_z[:n_uniform] + margin, z_min, sensor_z),
-            maxval=sensor_z
-        )
+        # 内部点 Z: surface_z - [0, 0.10] → SDF < 0
+        inside_z_offset = jax.random.uniform(keys[6], (n_inside,), minval=0.0, maxval=0.10)
+        inside_z = surface_z[:n_inside] - inside_z_offset
 
-        sz = jax.random.uniform(
-            keys[9], (n_surface,),
-            minval=jnp.clip(surface_z[n_uniform:n_uniform+n_surface] + margin, z_min, sensor_z),
-            maxval=jnp.clip(surface_z[n_uniform:n_uniform+n_surface] + 0.1, z_min, sensor_z)
-        )
+        # 表面附近 Z: surface_z ± 0.05 → SDF ≈ 0
+        surface_z_offset = jax.random.uniform(keys[7], (n_surface,), minval=-0.05, maxval=0.05)
+        surface_z_pts = surface_z[n_inside:n_inside+n_surface] + surface_z_offset
 
-        ez = jax.random.uniform(
-            keys[10], (n_edge,),
-            minval=jnp.clip(surface_z[n_uniform+n_surface:] + margin, z_min, sensor_z),
-            maxval=jnp.clip(surface_z[n_uniform+n_surface:] + 0.15, z_min, sensor_z)
-        )
+        # 外部点 Z: surface_z + [0.05, 0.50] → SDF > 0
+        outside_z_offset = jax.random.uniform(keys[8], (n_outside,), minval=0.05, maxval=0.50)
+        outside_z = surface_z[n_inside+n_surface:] + outside_z_offset
+        # 限制不超过传感器高度
+        outside_z = jnp.minimum(outside_z, sensor_z)
 
-        all_z = jnp.concatenate([uz, sz, ez])
+        all_z = jnp.concatenate([inside_z, surface_z_pts, outside_z])
 
         # 5. Combine queries
         queries_global = jnp.concatenate([global_xy, all_z[:, None]], axis=-1)
 
+        # 6. Convert to local coordinates (不再做SDF正数校验)
         T_world_to_lidar = get_camera_transforms(np.array(lidar_pose))[1]
         queries_local = global_to_local_points_numpy(np.array(queries_global), T_world_to_lidar)
         queries_local = jnp.array(queries_local)
@@ -341,6 +455,9 @@ class SDFDynamicGenerator:
     def sample_lidar_poses(self, key: jax.Array, batch_size: int) -> jnp.ndarray:
         """Sample random LiDAR poses over the terrain center.
 
+        The z height is based on terrain surface height at each (x, y) position,
+        ensuring the sensor is always above the terrain.
+
         Args:
             key: JAX random key
             batch_size: Number of poses to sample
@@ -348,17 +465,32 @@ class SDFDynamicGenerator:
         Returns:
             LiDAR poses, shape (batch_size, 6) with [x, y, z, roll, pitch, yaw]
         """
-        keys = jax.random.split(key, 6)
+        keys = jax.random.split(key, 7)
 
         # Sample near terrain center (assuming terrain is centered around origin)
-        x_range = 1.5
-        y_range = 1.5
+        # IMPORTANT: LiDAR position range should allow heightmap to cover terrain!
+        # - Terrain xy range: ±3.15m (WFC generated)
+        # - Heightmap scan range: ±0.5m (view_bounds)
+        # - LiDAR position range: ±2.0m (so heightmap covers ±0.5m around LiDAR)
+        # - This ensures heightmap (±0.5m) never exceeds terrain bounds (±3.15m)
+        x_range = 2.0  # LiDAR position range: ±2m
+        y_range = 2.0  # Heightmap will cover ±0.5m around this position
 
         x = jax.random.uniform(keys[0], (batch_size,), minval=-x_range, maxval=x_range)
         y = jax.random.uniform(keys[1], (batch_size,), minval=-y_range, maxval=y_range)
-        z = jax.random.uniform(keys[2], (batch_size,),
-                              minval=self.lidar_height_range[0],
-                              maxval=self.lidar_height_range[1])
+
+        # Get terrain height at each (x, y) position
+        xy_points = jnp.stack([x, y], axis=-1)
+        surface_z = self.batch_ray_cast_to_surface(xy_points)
+
+        # Sample z based on terrain height + offset
+        # Sensor should be at least 0.2m above terrain surface
+        z_offset_min = self.lidar_height_range[0]  # 0.4m minimum offset
+        z_offset_max = self.lidar_height_range[1]  # 0.8m maximum offset
+        z_offset = jax.random.uniform(keys[2], (batch_size,),
+                                       minval=z_offset_min,
+                                       maxval=z_offset_max)
+        z = surface_z + z_offset
 
         roll = jax.random.uniform(keys[3], (batch_size,), minval=-0.1, maxval=0.1)
         pitch = jax.random.uniform(keys[4], (batch_size,), minval=-0.1, maxval=0.1)
@@ -371,12 +503,30 @@ class SDFDynamicGenerator:
                             lidar_poses: jnp.ndarray) -> jnp.ndarray:
         """Generate heightmaps using ray casting.
 
+        Returns heightmaps in LOCAL coordinates:
+        - XY: relative to LiDAR center (with yaw rotation)
+        - Z: relative to GROUND height (0 = ground level, +0.1 = 10cm step up)
+
+        This is the standard representation for legged robot terrain perception:
+        - Z=0 means "at the same height as robot's base/feet"
+        - Z=+0.1 means "10cm obstacle to step over"
+        - Z=-0.1 means "10cm hole to avoid"
+
+        Uses "Shadow Base Frame" approach:
+        - XY and Yaw follow LiDAR position
+        - Z-axis is pinned at world Z=0 (sea level)
+        - This ensures terrain height is independent of LiDAR mounting height
+
         Args:
             key: JAX random key
             lidar_poses: LiDAR poses, shape (batch_size, 6)
+                pose[:3] = (x, y, sensor_z) - LiDAR absolute position
+                pose[5] = yaw angle
 
         Returns:
-            Heightmaps, shape (batch_size, H, W, 3) with 3D intersection points
+            Heightmaps in local coords, shape (batch_size, H, W, 3)
+            XY: relative to LiDAR center (range: ±0.5 meters)
+            Z: relative to ground height (ground = 0, step up = positive)
         """
         batch_size = lidar_poses.shape[0]
         H, W = self.heightmap_size
@@ -385,10 +535,11 @@ class SDFDynamicGenerator:
         heightmaps = []
         for i in range(batch_size):
             pose = np.array(lidar_poses[i])
-            center = pose[:3]
+            center = pose[:3]  # (x, y, sensor_z) - LiDAR absolute position
             yaw = pose[5]
 
-            hm, hit_mask = create_sensor_matrix_with_mask(
+            # 1. Ray casting to get world coordinate hit points
+            hm_world, hit_mask = create_sensor_matrix_with_mask(
                 self.mjx_model, self.mjx_data, center,
                 yaw=yaw,
                 key=None,
@@ -398,21 +549,52 @@ class SDFDynamicGenerator:
                 num_widthscans=W
             )
 
-            fallback_z = center[2]
-            miss_mask = ~hit_mask
-            hm_z = jnp.where(miss_mask, fallback_z, hm[..., 2])
-            hm = hm.at[..., 2].set(hm_z)
+            # ==================== Core Fix: Shadow Base Frame ====================
+            # 2. Build "Shadow Base Frame" (Gravity-Aligned Base Frame)
+            #    - XY and Yaw align with LiDAR
+            #    - Z-axis is FORCED to 0 (world sea level)
+            #    - This decouples terrain height from LiDAR mounting height
+            base_pose = np.array([
+                center[0], center[1], 0.0,  # Z=0 is the key!
+                0.0, 0.0, yaw  # roll=0, pitch=0, yaw=yaw (gravity-aligned)
+            ])
+            _, T_world_to_base = get_camera_transforms(base_pose)
 
-            heightmaps.append(hm)
+            # 3. Transform XY coordinates (hm_local Z still has real world altitude)
+            H_W = H * W
+            hm_world_flat = np.array(hm_world).reshape(H_W, 3)
+            hm_local_flat = global_to_local_points_numpy(hm_world_flat, T_world_to_base)
+            hm_local = jnp.array(hm_local_flat.reshape(H, W, 3))
+
+            # 4. Get the TRUE ground height directly under LiDAR
+            #    Center of grid (H//2, W//2) is the point right below LiDAR
+            ground_z_world = hm_world[H // 2, W // 2, 2]
+
+            # 5. Compute pure terrain relief (relative to ground)
+            #    This is what we want: 0=ground, +0.1=step up, -0.1=hole
+            hm_z_relative = hm_local[..., 2] - ground_z_world
+
+            # 6. Handle miss points (set to 0 = ground level) and clip extremes
+            miss_mask = ~hit_mask
+            hm_z_final = jnp.where(miss_mask, 0.0, hm_z_relative)
+            hm_z_final = jnp.clip(hm_z_final, -1.0, 1.0)  # Physical limits
+
+            # Combine: XY from transform, Z relative to ground
+            hm_local = hm_local.at[..., 2].set(hm_z_final)
+
+            heightmaps.append(hm_local)
 
         return jnp.array(heightmaps)
 
-    def generate_batch(self, key: jax.Array, batch_size: int) -> Dict[str, jnp.ndarray]:
-        """Generate a complete training batch.
+    def generate_batch(self, key: jax.Array, batch_size: int, verbose: bool = False) -> Dict[str, jnp.ndarray]:
+        """Generate a complete training batch using batched processing.
+
+        This method uses the new batched sampling approach for faster data generation.
 
         Args:
             key: JAX random key
             batch_size: Number of samples in batch
+            verbose: Print detailed timing information
 
         Returns:
             Dict containing:
@@ -422,37 +604,84 @@ class SDFDynamicGenerator:
                 - 'queries_global': (B, N, 3)
                 - 'lidar_pose': (B, 6)
         """
+        import time
+
         key1, key2, key3 = jax.random.split(key, 3)
 
         # 1. Sample LiDAR poses
+        if verbose:
+            print("    [Batch Gen] Step 1/4: Sampling LiDAR poses...", end='', flush=True)
+            t0 = time.time()
         lidar_poses = self.sample_lidar_poses(key1, batch_size)
+        if verbose:
+            print(f" Done ({time.time()-t0:.2f}s)")
 
         # 2. Generate heightmaps
+        if verbose:
+            print("    [Batch Gen] Step 2/4: Generating heightmaps...", end='', flush=True)
+            t0 = time.time()
         heightmaps = self.generate_heightmaps(key2, lidar_poses)
+        if verbose:
+            print(f" Done ({time.time()-t0:.2f}s)")
 
-        # 3. Sample query points
-        queries_local_list = []
-        queries_global_list = []
-        keys = jax.random.split(key3, batch_size)
+        # 3. Batch sample query points (NEW: uses batched processing)
+        if verbose:
+            print("    [Batch Gen] Step 3/4: Batch sampling query points...", end='', flush=True)
+            t0 = time.time()
 
-        for i in range(batch_size):
-            q_local, q_global = self.sample_queries_with_terrain(keys[i], lidar_poses[i])
-            queries_local_list.append(q_local)
-            queries_global_list.append(q_global)
+        queries_local, queries_global = self.sample_queries_batched(key3, lidar_poses)
 
-        queries_local = jnp.stack(queries_local_list, axis=0)
-        queries_global = jnp.stack(queries_global_list, axis=0)
+        if verbose:
+            print(f" Done ({time.time()-t0:.2f}s)")
 
-        # 4. Compute ground truth SDF
-        sdfs = get_ground_truth_sdf_with_floor(
-            queries_global.reshape(-1, 3),
+        # 4. Compute ground truth SDF (already validated in batched method)
+        if verbose:
+            print("    [Batch Gen] Step 4/4: Computing ground truth SDF...", end='', flush=True)
+            t0 = time.time()
+
+        # Final SDF computation for the batch
+        queries_flat = queries_global.reshape(-1, 3)
+        sdfs_flat = get_ground_truth_sdf_with_floor(
+            queries_flat,
             self.boxes_info,
             self.floor_height
         )
-        sdfs = sdfs.reshape(batch_size, self.num_queries_per_sample)
+        sdfs = sdfs_flat.reshape(batch_size, self.num_queries_per_sample)
+
+        if verbose:
+            num_neg = int(jnp.sum(sdfs_flat < 0.0))
+            print(f" Done ({time.time()-t0:.2f}s, negative SDFs: {num_neg})")
+
+        # 5. 物理固定缩放 (Fixed Scaling) - 保留绝对物理尺度!
+        # ================== 关键修改 ==================
+        # 废除单样本 Z-Score normalization!
+        # Z-Score 会摧毁物理尺度，导致网络无法预测绝对距离 SDF。
+        #
+        # 物理范围:
+        #   XY 原始是 [-0.5, 0.5] 米，乘以 2 变成 [-1, 1]
+        #   Z  原始是 [-1.0, 1.0] 米，乘以 1 保持 [-1, 1]
+        # ===============================================
+
+        if verbose:
+            print("\n  === Raw Heightmap Statistics (BEFORE fixed scaling, local coords) ===")
+            print(f"  Expected: X/Y in [-0.5, 0.5], Z in [-0.15, +0.15] (relative to ground)")
+            print(f"  Z=0: ground level, Z=+0.1: 10cm step up, Z=-0.1: 10cm hole")
+            print(f"  Actual X: [{float(heightmaps[..., 0].min()):.4f}, {float(heightmaps[..., 0].max()):.4f}], mean: {float(heightmaps[..., 0].mean()):.4f}")
+            print(f"  Actual Y: [{float(heightmaps[..., 1].min()):.4f}, {float(heightmaps[..., 1].max()):.4f}], mean: {float(heightmaps[..., 1].mean()):.4f}")
+            print(f"  Actual Z: [{float(heightmaps[..., 2].min()):.4f}, {float(heightmaps[..., 2].max()):.4f}], mean: {float(heightmaps[..., 2].mean()):.4f}")
+
+        # 1. 物理截断 (防打空/防自身碰撞)
+        heightmaps_clipped = jnp.clip(heightmaps, -1.0, 1.0)
+
+        # 2. 固定系数缩放 (Fixed Scaling) -> 强行映射到 [-1, 1]
+        # 构造缩放系数张量 [2.0, 2.0, 1.0]
+        scale_factors = jnp.array([2.0, 2.0, 1.0])
+
+        # 直接相乘，保留绝对物理尺度！
+        heightmaps_normalized = heightmaps_clipped * scale_factors
 
         return {
-            'heightmap': heightmaps,
+            'heightmap': heightmaps_normalized,
             'queries_local': queries_local,
             'sdf': sdfs,
             'queries_global': queries_global,

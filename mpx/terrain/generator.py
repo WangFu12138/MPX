@@ -344,7 +344,7 @@ def generate_14(size, test=False):
 
     wfc = WFCCore(14, connections, (size, size))
 
-    # Initialize outer boundary
+    # Initialize outer boundary as tile 0 (outer/empty)
     outer = 0
     for x in range(size):
         wfc.init((x, 0), outer)
@@ -354,11 +354,20 @@ def generate_14(size, test=False):
         wfc.init((0, y), outer)
         wfc.init((size - 1, y), outer)
 
-    # Initialize center
-    if test or np.random.random() > 0.5:
-        wfc.init((size // 2, size // 2), 0)
-    else:
+    # Initialize center - prefer tile 1 (flat platform) to ensure terrain is generated
+    # Tile 0 = outer/empty (no boxes), Tile 1 = flat platform (generates boxes)
+    # When test=True, we want reliable terrain, so use tile 1
+    # Otherwise, randomly choose with 70% chance for tile 1 (flat) or stairs
+    if test:
+        # For testing, always use flat platform to ensure boxes are generated
         wfc.init((size // 2, size // 2), 1)
+    else:
+        # For training, add variety: flat (1) or random stairs (2-5)
+        if np.random.random() < 0.7:
+            wfc.init((size // 2, size // 2), 1)  # Flat platform
+        else:
+            # Random stair direction
+            wfc.init((size // 2, size // 2), np.random.randint(2, 6))
 
     wfc.solve()
     wave = wfc.wave.wave
@@ -370,34 +379,47 @@ def addElement(map: TerrainGenerator, index, pos):
     """Add a terrain element based on WFC tile index."""
     height = map.block_height
     if index == 0:
+        # tile 0 is outer boundary (empty) - don't add anything
         return
-        # map.AddFlat(init_pos=[pos[0], pos[1], 0.], height=0.)
     elif index == 1:
+        # tile 1 is flat platform
         map.AddFlat(init_pos=[pos[0], pos[1], 0.], height=height)
     elif index == 2:
+        # tile 2: stairs going up (yaw=0)
         map.AddStairs(init_pos=[pos[0], pos[1], 0], yaw=0)
     elif index == 3:
-        map.AddStairs(init_pos=[pos[0], pos[1], 0], yaw=np.pi / 2)
+        # tile 3: stairs going up (yaw=pi/2)
+        map.AddStairs(init_pos=[pos[0], pos[1], 0], yaw=np.pi/2)
     elif index == 4:
+        # tile 4: stairs going up (yaw=pi)
         map.AddStairs(init_pos=[pos[0], pos[1], 0], yaw=np.pi)
     elif index == 5:
-        map.AddStairs(init_pos=[pos[0], pos[1], 0], yaw=-np.pi / 2)
+        # tile 5: stairs going up (yaw=-pi/2)
+        map.AddStairs(init_pos=[pos[0], pos[1], 0], yaw=-np.pi/2)
     elif index == 6:
+        # tile 6: turning stairs up (yaw=0)
         map.AddTurningStairsUp(init_pos=[pos[0], pos[1], 0.], yaw=0.)
     elif index == 7:
-        map.AddTurningStairsUp(init_pos=[pos[0], pos[1], 0.], yaw=np.pi / 2)
+        # tile 7: turning stairs up (yaw=pi/2)
+        map.AddTurningStairsUp(init_pos=[pos[0], pos[1], 0.], yaw=np.pi/2)
     elif index == 8:
+        # tile 8: turning stairs up (yaw=pi)
         map.AddTurningStairsUp(init_pos=[pos[0], pos[1], 0.], yaw=np.pi)
     elif index == 9:
-        map.AddTurningStairsUp(init_pos=[pos[0], pos[1], 0.], yaw=-np.pi / 2)
+        # tile 9: turning stairs up (yaw=3*pi/2)
+        map.AddTurningStairsUp(init_pos=[pos[0], pos[1], 0.], yaw=3*np.pi/2)
     elif index == 10:
-        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0], yaw=0)
+        # tile 10: turning stairs down (yaw=0)
+        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0.], yaw=0.)
     elif index == 11:
-        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0], yaw=np.pi / 2)
+        # tile 11: turning stairs down (yaw=pi/2)
+        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0.], yaw=np.pi/2)
     elif index == 12:
-        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0], yaw=np.pi)
+        # tile 12: turning stairs down (yaw=pi)
+        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0.], yaw=np.pi)
     elif index == 13:
-        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0], yaw=-np.pi / 2)
+        # tile 13: turning stairs down (yaw=-pi/2)
+        map.AddTurningStairsDown(init_pos=[pos[0], pos[1], 0.], yaw=-np.pi/2)
 
 
 def create_centered_grid(N, d):

@@ -9,3 +9,10 @@ c_generated_code/
 *.TXT
 *.pkl
 *.egg*info/
+
+# 权重文件
+checkpoints/**/*.npz
+checkpoints/**/*.pkl
+
+# 备份文件
+*.tar.gz

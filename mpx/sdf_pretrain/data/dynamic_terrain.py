@@ -33,7 +33,7 @@ from mpx.terrain.generator import (
 @dataclass
 class TerrainConfig:
     """Configuration for terrain generation."""
-    size: int = 5  # WFC grid size
+    size: int = 7  # WFC grid size (increased for more variety)
     width: float = 0.35  # Step width
     step_height_min: float = 0.04  # Minimum step height
     step_height_max: float = 0.12  # Maximum step height
@@ -91,8 +91,8 @@ class DynamicTerrainManager:
             render=False
         )
 
-        # Generate WFC map - use test=True to ensure center is initialized
-        wave = generate_14(size=cfg.size, test=True)
+        # Generate WFC map - use test=False for more variety
+        wave = generate_14(size=cfg.size, test=False)
 
         # Create position grid
         grid = create_centered_grid(cfg.size, tg.length)
@@ -106,12 +106,15 @@ class DynamicTerrainManager:
         if tg.count_boxes == 0:
             print("Warning: WFC generated 0 boxes, using fallback terrain")
             # Create simple stairs as fallback
+            # IMPORTANT: Box position is center, size[2] is half-size
             for i in range(3):
                 for k in range(cfg.size):
                     x = (k - cfg.size // 2) * tg.length
                     y = (i - 1) * 0.5
-                    z = (k + 1) * step_height / 2
-                    tg.AddBox([x, y, z / 2], [0, 0, 0], [tg.width, 0.5, z])
+                    height = (k + 1) * step_height
+                    # Box center should be at height/2 so top is at height
+                    # size[2] is half-size: [width/2, length/2, height/2]
+                    tg.AddBox([x, y, height / 2], [0, 0, 0], [tg.width / 2, 0.5, height / 2])
 
         # Convert box_data to boxes_info format
         boxes_info = []
