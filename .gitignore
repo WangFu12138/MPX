@@ -16,3 +16,10 @@ checkpoints/**/*.pkl
 
 # 备份文件
 *.tar.gz
+
+# 数据文件
+*.h5
+data/vae_dataset/
+
+# 测试结果图片
+*.png

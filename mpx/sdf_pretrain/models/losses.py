@@ -309,3 +309,28 @@ def sdf_total_loss(
     return {
         'mse': mse,
     }
+# 将这段代码添加到 mpx/sdf_pretrain/models/losses.py 的末尾
+
+def vae_loss_fn(recon_x, x, mean, logvar, kl_weight=0.001):
+    """
+    VAE 的联合损失函数
+    - recon_x: 预测的高程图 (B, 128, 128, 1)
+    - x: 真实的高程图 (B, 128, 128, 1)
+    - mean: 潜变量均值
+    - logvar: 潜变量对数方差
+    - kl_weight: KL 散度的权重 (防止 KL 塌陷)
+    """
+    # 使用 L1 (MAE) 加上一点点 MSE 来兼顾锐利度和稳定性
+    l1_loss = jnp.mean(jnp.abs(recon_x - x))
+    mse_loss = jnp.mean(jnp.square(recon_x - x))
+    recon_loss = l1_loss + 0.5 * mse_loss
+    
+    # 2. KL 散度 (KL Divergence) - 强迫潜变量服从标准正态分布 N(0, 1)
+    # 公式: -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+    # 我们先在特征维度(axis=-1)上求和，然后在 Batch 维度上求平均
+    kld_loss = -0.5 * jnp.mean(jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar), axis=-1))
+    
+    # 3. 总损失
+    total_loss = recon_loss + kl_weight * kld_loss
+    
+    return total_loss, recon_loss, kld_loss

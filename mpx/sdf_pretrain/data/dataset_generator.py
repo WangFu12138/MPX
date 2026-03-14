@@ -63,7 +63,7 @@ class SDFDynamicGenerator:
                  heightmap_resolution: float = 0.05,
                  num_queries_per_sample: int = 1024,
                  lidar_height_range: Tuple[float, float] = (0.4, 0.8),
-                 view_bounds: Tuple[float, float, float, float, float, float] = (-0.5, 0.5, -0.5, 0.5, 0.01, 0.5),
+                 view_bounds: Tuple[float, float, float, float, float, float] = (-1.0, 1.0, -1.0, 1.0, 0.01, 1.5),
                  floor_height: float = 0.0,
                  terrain_config: Optional[TerrainConfig] = None,
                  use_curriculum: bool = False):
